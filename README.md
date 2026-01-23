@@ -1,9 +1,9 @@
 # annuaire-t-l-phonique-NSI
 # répartition du travail:
-Samuel :    
+# Samuel :    
     -   python (db)
     -   html(un peu)
-Théo:
+# Théo:
     -   appli node js(electronjs)
     -   html
     -   css
