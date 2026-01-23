@@ -1,2 +1,2 @@
 # annuaire-t-l-phonique-NSI
-ceci est un annulaire
+ceci est un annulaire du futur
