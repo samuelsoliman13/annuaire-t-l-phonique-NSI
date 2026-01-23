@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "nom": "Dupont",
+        "prenom": "Jean",
+        "email": "jean.dupont@example.com",
+        "telephone": "06 99 88 77 66",
+        "adresse": "123 rue de Paris, 75000 Paris",
+        "adresse_travail": "456 avenue de l'Industrie, 92000 Nanterre",
+        "date_creation": "2026-01-23T11:13:09.163273",
+        "date_modification": "2026-01-23T11:13:09.163988"
+    },
+    {
+        "id": 2,
+        "nom": "Martin",
+        "prenom": "Sophie",
+        "email": "sophie.martin@example.com",
+        "telephone": "07 98 76 54 32",
+        "adresse": "789 boulevard Saint-Germain, 75005 Paris",
+        "adresse_travail": "200 rue de Rivoli, 75001 Paris",
+        "date_creation": "2026-01-23T11:13:09.163576"
+    }
+]
