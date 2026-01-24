@@ -19,5 +19,25 @@
         "adresse": "789 boulevard Saint-Germain, 75005 Paris",
         "adresse_travail": "200 rue de Rivoli, 75001 Paris",
         "date_creation": "2026-01-23T11:13:09.163576"
+    },
+    {
+        "id": 3,
+        "nom": "De la chapelle",
+        "prenom": "Théo",
+        "email": "theo181208@gmail.com",
+        "telephone": "434",
+        "adresse": "343",
+        "adresse_travail": "'\"é",
+        "date_creation": "2026-01-24T17:59:40.783085"
+    },
+    {
+        "id": 4,
+        "nom": "dez",
+        "prenom": "fzefez",
+        "email": "fzefze@xn--zrze-uv7a",
+        "telephone": "zefzef",
+        "adresse": "zefez",
+        "adresse_travail": "fze",
+        "date_creation": "2026-01-24T18:06:43.110749"
     }
 ]

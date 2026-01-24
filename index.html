@@ -6,19 +6,36 @@
   </head>
   <body>
     <h1>Annuaire Téléphonique</h1>
-    <form>
+    <button id="forget-choice">Forget Database Choice</button>
+
+    <h2>Ajouter/Modifier un contact</h2>
+    <form id="contact-form">
+      <input type="hidden" id="contact-id" name="contact-id">
       <label for="nom">Nom:</label><br>
-      <input type="text" id="nom" name="nom"><br>
+      <input type="text" id="nom" name="nom" required><br>
       <label for="prenom">Prénom:</label><br>
-      <input type="text" id="prenom" name="prenom"><br>
+      <input type="text" id="prenom" name="prenom" required><br>
       <label for="email">Email:</label><br>
-      <input type="email" id="email" name="email"><br>
+      <input type="email" id="email" name="email" required><br>
       <label for="tel">Numéro de tel:</label><br>
-      <input type="tel" id="tel" name="tel"><br>
+      <input type="tel" id="tel" name="tel" required><br>
       <label for="adresse">Adresse:</label><br>
-      <input type="text" id="adresse" name="adresse"><br>
+      <input type="text" id="adresse" name="adresse" required><br>
       <label for="adresse_travail">Adresse de travail:</label><br>
-      <input type="text" id="adresse_travail" name="adresse_travail"><br>
+      <input type="text" id="adresse_travail" name="adresse_travail" required><br><br>
+      <button type="submit">Enregistrer</button>
     </form>
+
+    <h2>Rechercher un contact</h2>
+    <form id="search-form">
+      <input type="text" id="search-term" name="search-term" required>
+      <button type="submit">Rechercher</button>
+    </form>
+
+    <h2>Liste des contacts</h2>
+    <ul id="contact-list">
+    </ul>
+
+    <script src="index.js"></script>
   </body>
 </html>
