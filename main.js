@@ -43,11 +43,12 @@ async function handleDbChoice(choice) {
   }
   createWindow();
 
-  let dbUri;
   let apiBaseUrl;
 
   if (choice.type === 'local') {
-    pythonProcess = spawn('python', ['api.py']);
+    const dbUri = `sqlite:///${path.join(app.getPath('userData'), 'contacts.db')}`; // Utiliser le chemin des données de l'application pour SQLite
+    // Spawn the Python process with the db-uri argument
+    pythonProcess = spawn('python', ['api.py', '--db-uri', dbUri]);
     pythonProcess.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
     });
@@ -55,41 +56,23 @@ async function handleDbChoice(choice) {
       console.error(`stderr: ${data}`);
     });
     apiBaseUrl = 'http://localhost:5000';
-    dbUri = `sqlite:///${path.join(app.getPath('userData'), 'contacts.db')}`; // Utiliser le chemin des données de l'application pour SQLite
+    // Give the Python server a moment to start up
+    await new Promise(resolve => setTimeout(resolve, 3000)); 
+    console.log('Local Python server started with DB URI:', dbUri);
   } else {
+    // For remote, the API URL is provided directly, no Python process spawned here
     apiBaseUrl = choice.url;
-    dbUri = choice.url; // Pour le distant, l'URL elle-même est l'URI
+    console.log('Using remote API URL:', apiBaseUrl);
   }
 
-  // Envoyer la requête init-db à l'API Python
-  try {
-    // Attendre que le serveur Python démarre si local
-    if (choice.type === 'local') {
-      await new Promise(resolve => setTimeout(resolve, 3000)); // Lui donner un peu plus de temps
-    }
+  // Send the API base URL to the renderer process
+  mainWindow.webContents.send('db-url', apiBaseUrl);
 
-    const response = await fetch(`${apiBaseUrl}/api/init-db`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ db_uri: dbUri })
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to initialize database: ${response.statusText}`);
-    }
-    console.log('Database initialized successfully with:', dbUri);
-    mainWindow.webContents.send('db-url', apiBaseUrl);
-
-    // Sauvegarder le choix si 'remember' est vrai
-    if (choice.remember) {
-      store.set('dbChoice', choice);
-    } else {
-      store.delete('dbChoice');
-    }
-
-  } catch (error) {
-    console.error('Error initializing database:', error);
-    // Repli ou affichage d'une erreur à l'utilisateur
-    app.quit(); // Ou redémarrer, ou afficher un écran d'erreur
+  // Sauvegarder le choix si 'remember' est vrai
+  if (choice.remember) {
+    store.set('dbChoice', choice);
+  } else {
+    store.delete('dbChoice');
   }
 }
 
