@@ -1,0 +1,165 @@
+/* General Body Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Headings */
+h1, h2 {
+    color: #444;
+    margin-bottom: 15px;
+}
+
+h1 {
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+h2 {
+    font-size: 1.5em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 5px;
+}
+
+/* Forms Container */
+.forms-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.form-wrapper {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Forms */
+form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="tel"] {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* To include padding and border in the element's total width and height */
+}
+
+/* Buttons */
+button {
+    background-color: #007AFF;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:active {
+    background-color: #004085;
+}
+
+#forget-choice {
+    background-color: #dc3545;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+#forget-choice:hover {
+    background-color: #c82333;
+}
+
+.cancel-btn, .clear-btn {
+    background-color: #6c757d;
+    margin-left: 10px;
+}
+
+.cancel-btn:hover, .clear-btn:hover {
+    background-color: #5a6268;
+}
+
+/* Contact List */
+#contact-list {
+    list-style: none;
+    padding: 0;
+}
+
+#contact-list li {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#contact-list li .contact-info {
+    flex-grow: 1;
+}
+
+#contact-list li .actions button {
+    margin-left: 10px;
+}
+
+#contact-list li .actions .edit-btn {
+    background-color: #ffc107;
+}
+
+#contact-list li .actions .edit-btn:hover {
+    background-color: #e0a800;
+}
+
+#contact-list li .actions .delete-btn {
+    background-color: #dc3545;
+}
+
+#contact-list li .actions .delete-btn:hover {
+    background-color: #c82333;
+}
+
+.contact-list-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+
+/* Success Message */
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+}

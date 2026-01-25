@@ -3,38 +3,48 @@
   <head>
     <meta charset="UTF-8">
     <title>Annuaire Téléphonique</title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <h1>Annuaire Téléphonique</h1>
     <button id="forget-choice">Forget Database Choice</button>
 
-    <h2>Ajouter/Modifier un contact</h2>
-    <form id="contact-form">
-      <input type="hidden" id="contact-id" name="contact-id">
-      <label for="nom">Nom:</label><br>
-      <input type="text" id="nom" name="nom" required><br>
-      <label for="prenom">Prénom:</label><br>
-      <input type="text" id="prenom" name="prenom" required><br>
-      <label for="email">Email:</label><br>
-      <input type="email" id="email" name="email" required><br>
-      <label for="tel">Numéro de tel:</label><br>
-      <input type="tel" id="tel" name="tel" required><br>
-      <label for="adresse">Adresse:</label><br>
-      <input type="text" id="adresse" name="adresse" required><br>
-      <label for="adresse_travail">Adresse de travail:</label><br>
-      <input type="text" id="adresse_travail" name="adresse_travail" required><br><br>
-      <button type="submit">Enregistrer</button>
-    </form>
+    <div class="forms-container">
+        <div class="form-wrapper">
+            <h2>Ajouter/Modifier un contact</h2>
+            <form id="contact-form">
+                <input type="hidden" id="contact-id" name="contact-id">
+                <label for="nom">Nom:</label>
+                <input type="text" id="nom" name="nom" required>
+                <label for="prenom">Prénom:</label>
+                <input type="text" id="prenom" name="prenom" required>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <label for="tel">Numéro de tel:</label>
+                <input type="tel" id="tel" name="tel" required>
+                <label for="adresse">Adresse:</label>
+                <input type="text" id="adresse" name="adresse" required>
+                <label for="adresse_travail">Adresse de travail:</label>
+                <input type="text" id="adresse_travail" name="adresse_travail" required>
+                <button type="submit">Enregistrer</button>
+            </form>
+        </div>
 
-    <h2>Rechercher un contact</h2>
-    <form id="search-form">
-      <input type="text" id="search-term" name="search-term" required>
-      <button type="submit">Rechercher</button>
-    </form>
+        <div class="form-wrapper">
+            <h2>Rechercher un contact</h2>
+            <form id="search-form">
+                <input type="text" id="search-term" name="search-term" required>
+                <button type="submit">Rechercher</button>
+                <button type="button" id="clear-search-btn" class="clear-btn">Annuler la recherche</button>
+            </form>
+        </div>
+    </div>
 
-    <h2>Liste des contacts</h2>
-    <ul id="contact-list">
-    </ul>
+    <div class="contact-list-container">
+        <h2>Liste des contacts</h2>
+        <ul id="contact-list">
+        </ul>
+    </div>
 
     <script src="index.js"></script>
   </body>

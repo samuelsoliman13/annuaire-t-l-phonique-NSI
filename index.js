@@ -9,8 +9,8 @@ const telInput = document.getElementById('tel');
 const adresseInput = document.getElementById('adresse');
 const adresseTravailInput = document.getElementById('adresse_travail');
 const forgetChoiceButton = document.getElementById('forget-choice');
+const clearSearchBtn = document.getElementById('clear-search-btn');
 
-// Récupérer tous les contacts et les afficher
 function loadContacts() {
   window.api.fetch('/api/contacts')
     .then(contacts => {
@@ -18,9 +18,17 @@ function loadContacts() {
       contacts.forEach(contact => {
         const li = document.createElement('li');
         li.innerHTML = `
-          ${contact.nom} ${contact.prenom} - ${contact.email}
-          <button onclick="editContact(${contact.id})">Modifier</button>
-          <button onclick="deleteContact(${contact.id})">Supprimer</button>
+          <div class="contact-info">
+              <strong>${contact.nom} ${contact.prenom}</strong><br>
+              Email: ${contact.email}<br>
+              Téléphone: ${contact.telephone}<br>
+              Adresse: ${contact.adresse}<br>
+              Adresse de travail: ${contact.adresse_travail}
+          </div>
+          <div class="actions">
+              <button class="edit-btn" onclick="editContact(${contact.id})">Modifier</button>
+              <button class="delete-btn" onclick="deleteContact(${contact.id})">Supprimer</button>
+          </div>
         `;
         contactList.appendChild(li);
       });
@@ -49,6 +57,20 @@ contactForm.addEventListener('submit', (event) => {
     }).then(() => {
       contactForm.reset();
       loadContacts();
+      const successMessage = document.createElement('div');
+      successMessage.classList.add('success-message');
+      successMessage.textContent = 'Contact mis à jour avec succès!';
+      contactForm.prepend(successMessage);
+      setTimeout(() => {
+        successMessage.remove();
+      }, 3000);
+
+      const submitButton = contactForm.querySelector('button[type="submit"]');
+      submitButton.textContent = 'Enregistrer';
+      const cancelButton = contactForm.querySelector('.cancel-btn');
+      if (cancelButton) {
+        cancelButton.remove();
+      }
     });
   } else {
     // Ajouter un nouveau contact
@@ -59,6 +81,13 @@ contactForm.addEventListener('submit', (event) => {
     }).then(() => {
       contactForm.reset();
       loadContacts();
+      const successMessage = document.createElement('div');
+      successMessage.classList.add('success-message');
+      successMessage.textContent = 'Contact ajouté avec succès!';
+      contactForm.prepend(successMessage);
+      setTimeout(() => {
+        successMessage.remove();
+      }, 3000);
     });
   }
 });
@@ -73,9 +102,17 @@ searchForm.addEventListener('submit', (event) => {
       contacts.forEach(contact => {
         const li = document.createElement('li');
         li.innerHTML = `
-          ${contact.nom} ${contact.prenom} - ${contact.email}
-          <button onclick="editContact(${contact.id})">Modifier</button>
-          <button onclick="deleteContact(${contact.id})">Supprimer</button>
+          <div class="contact-info">
+              <strong>${contact.nom} ${contact.prenom}</strong><br>
+              Email: ${contact.email}<br>
+              Téléphone: ${contact.telephone}<br>
+              Adresse: ${contact.adresse}<br>
+              Adresse de travail: ${contact.adresse_travail}
+          </div>
+          <div class="actions">
+              <button class="edit-btn" onclick="editContact(${contact.id})">Modifier</button>
+              <button class="delete-btn" onclick="deleteContact(${contact.id})">Supprimer</button>
+          </div>
         `;
         contactList.appendChild(li);
       });
@@ -86,7 +123,17 @@ searchForm.addEventListener('submit', (event) => {
 function deleteContact(id) {
   if (confirm('Êtes-vous sûr de vouloir supprimer ce contact ?')) {
     window.api.fetch(`/api/contacts/${id}`, { method: 'DELETE' })
-      .then(() => loadContacts());
+      .then(() => {
+        loadContacts();
+        const successMessage = document.createElement('div');
+        successMessage.classList.add('success-message');
+        successMessage.textContent = 'Contact supprimé avec succès!';
+        const contactListContainer = document.querySelector('.contact-list-container');
+        contactListContainer.prepend(successMessage);
+        setTimeout(() => {
+          successMessage.remove();
+        }, 3000);
+      });
   }
 }
 
@@ -101,6 +148,27 @@ function editContact(id) {
       telInput.value = contact.telephone;
       adresseInput.value = contact.adresse;
       adresseTravailInput.value = contact.adresse_travail;
+
+      const submitButton = contactForm.querySelector('button[type="submit"]');
+      submitButton.textContent = 'Mettre à jour';
+
+      let cancelButton = contactForm.querySelector('.cancel-btn');
+      if (!cancelButton) {
+        cancelButton = document.createElement('button');
+        cancelButton.type = 'button';
+        cancelButton.textContent = 'Annuler';
+        cancelButton.classList.add('cancel-btn');
+        submitButton.after(cancelButton);
+
+        cancelButton.addEventListener('click', () => {
+          contactForm.reset();
+          contactIdInput.value = '';
+          submitButton.textContent = 'Enregistrer';
+          cancelButton.remove();
+        });
+      }
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
 
@@ -114,4 +182,10 @@ forgetChoiceButton.addEventListener('click', () => {
     if (confirm('Are you sure you want to forget your database choice and restart the application?')) {
         window.api.forgetDbChoice();
     }
+});
+
+// Écouteur d'événements pour le bouton "Annuler la recherche"
+clearSearchBtn.addEventListener('click', () => {
+    document.getElementById('search-term').value = '';
+    loadContacts();
 });
