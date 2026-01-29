@@ -8,7 +8,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Run the Flask API for Annuaire Téléphonique.")
 parser.add_argument('--db-uri', type=str, default='sqlite:///contacts.db',
-                    help='The database URI for SQLAlchemy.')
+help='The database URI for SQLAlchemy.')
 args = parser.parse_args()
 
 app = Flask(__name__)
