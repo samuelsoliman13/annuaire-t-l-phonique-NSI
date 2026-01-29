@@ -47,8 +47,17 @@ async function handleDbChoice(choice) {
 
   if (choice.type === 'local') {
     const dbUri = `sqlite:///${path.join(app.getPath('userData'), 'contacts.db')}`; // Utiliser le chemin des données de l'application pour SQLite
-    // Spawn the Python process with the db-uri argument
-    pythonProcess = spawn('python', ['api.py', '--db-uri', dbUri]);
+    
+    // Start the local backend
+    if (app.isPackaged) {
+      // In production, run the packaged executable
+      const apiExePath = path.join(process.resourcesPath, 'build', 'python', 'api_server.exe');
+      pythonProcess = spawn(apiExePath, ['--db-uri', dbUri]);
+    } else {
+      // In development, run the Python script
+      pythonProcess = spawn('python', ['api.py', '--db-uri', dbUri]);
+    }
+
     pythonProcess.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
     });
