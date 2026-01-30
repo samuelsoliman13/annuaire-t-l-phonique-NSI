@@ -84,6 +84,27 @@ button:active {
     background-color: #004085;
 }
 
+/* Animation du bouton Enregistrer */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.save-btn {
+    animation: pulse 0.6s ease-in-out;
+}
+
+.save-btn:active {
+    animation: pulse 0.3s ease-in-out;
+}
+
 #forget-choice {
     background-color: #dc3545;
     position: absolute;
