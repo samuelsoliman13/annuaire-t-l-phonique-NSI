@@ -1,4 +1,10 @@
 __pycache__/
 node_modules
+<<<<<<< HEAD
 .venv
 contacts.json
+=======
+contacts.json
+dist
+build
+>>>>>>> 2d0bb6680990b58ba51f6bed7800aed03b7daefc
