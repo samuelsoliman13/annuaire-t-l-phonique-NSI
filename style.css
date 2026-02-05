@@ -46,10 +46,34 @@ form {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 30px;
 }
+.search-form {
+    box-shadow: none;
+    display: flex;
+    align-items: stretch; /* Garde ça */
+    padding: 7px 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
+.search-form input[type="text"] {
+    flex: 1;
+    height: 48px;
+    box-sizing: border-box;
+    
+}
+
+.search-buttons {
+    display: flex;
+    margin-left: 1%;
+    padding: 0; /* ENLÈVE le padding 1% 1% */
+}
+
+.search-buttons button {
+    height: 48px; /* Même hauteur que l'input */
+    box-sizing: border-box;
+    padding: 0 20px;
+}
 form label {
     display: block;
-    margin-bottom: 5px;
     font-weight: bold;
 }
 
