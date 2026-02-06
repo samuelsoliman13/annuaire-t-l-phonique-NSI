@@ -117,17 +117,29 @@ ipcMain.handle('ping-url', async (event, url) => {
     const healthUrl = new URL('/api/health', url).toString();
     return new Promise((resolve) => {
       const request = net.request(healthUrl);
+
+      const timeout = setTimeout(() => {
+        request.abort();
+      }, 5000); // 5-second timeout
+
       request.on('response', (response) => {
+        clearTimeout(timeout);
         resolve(response.statusCode === 200);
       });
+
       request.on('error', (error) => {
+        clearTimeout(timeout);
         console.error(`Ping error: ${error.message}`);
         resolve(false);
       });
-       // Timeout in case the connection hangs
-      request.setTimeout(5000, () => {
-        request.abort();
+
+      request.on('abort', () => {
+        clearTimeout(timeout);
+        // The 'abort' event can be triggered by the timeout itself, so a specific log isn't always needed,
+        // but it's good to resolve false in case of an external abort.
+        resolve(false);
       });
+
       request.end();
     });
   } catch (error) {
