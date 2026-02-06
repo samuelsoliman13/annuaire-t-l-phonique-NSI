@@ -3,3 +3,6 @@
 Error occurred in handler for 'ping-url': TypeError: request.setTimeout is not a function
     at C:\Users\theo1\Documents\annuaire-t-l-phonique-NSI\main.js:128:15
     at new Promise (<anonymous>)
+    Using remote API URL: http://172.18.6.109:5001
+[9720:0206/100423.941:ERROR:CONSOLE:1] "Request Autofill.enable failed. {"code":-32601,"message":"'Autofill.enable' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+[9720:0206/100423.986:ERROR:CONSOLE:1] "Request Autofill.setAddresses failed. {"code":-32601,"message":"'Autofill.setAddresses' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
