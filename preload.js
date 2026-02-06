@@ -27,5 +27,8 @@ contextBridge.exposeInMainWorld('api', {
 contextBridge.exposeInMainWorld('ipc', {
   send: (channel, data) => {
     ipcRenderer.send(channel, data);
+  },
+  ping: async (url) => {
+    return await ipcRenderer.invoke('ping-url', url);
   }
 });

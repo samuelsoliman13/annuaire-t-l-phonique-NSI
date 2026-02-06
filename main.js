@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, net } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const Store = require('electron-store');
@@ -33,6 +33,7 @@ function createWindow() {
   });
 
   mainWindow.loadFile('index.html');
+  mainWindow.webContents.openDevTools();
 }
 
 // Fonction pour gérer l'initialisation de la base de données et la création de la fenêtre
@@ -108,6 +109,30 @@ ipcMain.on('forget-db-choice', () => {
   if (pythonProcess) pythonProcess.kill();
   app.relaunch();
   app.quit();
+});
+
+ipcMain.handle('ping-url', async (event, url) => {
+  try {
+    const healthUrl = new URL('/api/health', url).toString();
+    return new Promise((resolve) => {
+      const request = net.request(healthUrl);
+      request.on('response', (response) => {
+        resolve(response.statusCode === 200);
+      });
+      request.on('error', (error) => {
+        console.error(`Ping error: ${error.message}`);
+        resolve(false);
+      });
+       // Timeout in case the connection hangs
+      request.setTimeout(5000, () => {
+        request.abort();
+      });
+      request.end();
+    });
+  } catch (error) {
+    console.error(`Invalid URL for ping: ${url}`);
+    return false; // Invalid URL
+  }
 });
 
 
