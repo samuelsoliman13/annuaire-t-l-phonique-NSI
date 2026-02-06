@@ -70,15 +70,6 @@ Upon launch, you will be prompted to choose your database preference:
 *   **Local Database:** A Python Flask server will be automatically started in the background, using a local SQLite database (`contacts.db` in Electron's user data path).
 *   **Remote Database:** You will need to provide the URL of an existing, compatible Flask API server.
 
-### Running the Python CLI (Optional, separate from Electron)
-
-To use the command-line interface for contact management:
-
-```bash
-python cli.py
-```
-*(Note: Ensure that the `AnnuaireManager` class from `api.py` is correctly imported and available to `cli.py`. If running `cli.py` directly, it will default to using a local `contacts.db` in the current working directory unless explicitly configured otherwise within its execution context.)*
-
 ## Development Conventions
 
 *   **Separation of Concerns:** Clear distinction between frontend (Electron, JavaScript, HTML, CSS) and backend (Python Flask) logic.
