@@ -55,7 +55,7 @@ async function handleDbChoice(choice) {
       pythonProcess = spawn(apiExePath, ['--db-uri', dbUri]);
     } else {
       // In development, run the Python script
-      pythonProcess = spawn('python', ['api_boosted.py', '--db-uri', dbUri]);
+      pythonProcess = spawn('python', ['api_server.py', '--db-uri', dbUri]);
     }
 
     pythonProcess.stdout.on('data', (data) => {
