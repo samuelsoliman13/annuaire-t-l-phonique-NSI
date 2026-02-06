@@ -38,6 +38,7 @@ function createWindow() {
 
 // Fonction pour gérer l'initialisation de la base de données et la création de la fenêtre
 async function handleDbChoice(choice) {
+  console.log('Received db-choice:', JSON.stringify(choice, null, 2));
   if (choiceWindow) {
     choiceWindow.close();
     choiceWindow = null;
