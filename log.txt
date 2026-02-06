@@ -1,0 +1,5 @@
+(node:17812) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `electron --trace-deprecation ...` to show where the warning was created)
+Error occurred in handler for 'ping-url': TypeError: request.setTimeout is not a function
+    at C:\Users\theo1\Documents\annuaire-t-l-phonique-NSI\main.js:128:15
+    at new Promise (<anonymous>)
