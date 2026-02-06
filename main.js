@@ -64,7 +64,7 @@ async function handleDbChoice(choice) {
     pythonProcess.stderr.on('data', (data) => {
       console.error(`stderr: ${data}`);
     });
-    apiBaseUrl = 'http://localhost:5000';
+    apiBaseUrl = 'http://localhost:5001';
     // Give the Python server a moment to start up
     await new Promise(resolve => setTimeout(resolve, 3000)); 
     console.log('Local Python server started with DB URI:', dbUri);
