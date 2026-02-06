@@ -33,7 +33,6 @@ function createWindow() {
   });
 
   mainWindow.loadFile('index.html');
-  mainWindow.webContents.openDevTools();
 }
 
 // Fonction pour gérer l'initialisation de la base de données et la création de la fenêtre
