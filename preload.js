@@ -12,7 +12,9 @@ contextBridge.exposeInMainWorld('api', {
     if (!dbUrl) {
       return Promise.reject('Database URL not set');
     }
-    return fetch(`${dbUrl}${url}`, options).then(res => res.json());
+    const fullUrl = `${dbUrl}${url}`;
+    console.log(`Fetching from: ${fullUrl}`); // Log the full URL
+    return fetch(fullUrl, options).then(res => res.json());
   },
   on: (channel, callback) => {
     ipcRenderer.on(channel, callback);
