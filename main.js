@@ -64,7 +64,7 @@ async function handleDbChoice(choice) {
     pythonProcess.stderr.on('data', (data) => {
       console.error(`stderr: ${data}`);
     });
-    apiBaseUrl = 'http://localhost:5001';
+    apiBaseUrl = 'http://127.0.0.1:5001';
     await new Promise(resolve => setTimeout(resolve, 3000)); 
     console.log('Local Python server started with DB URI:', dbUri);
   } else {
@@ -73,7 +73,7 @@ async function handleDbChoice(choice) {
   }
   
  //Attendre que la page soit chargée
-  mainWindow.webContents.on('did-finish-load', () => {
+  mainWindow.webContents.once('did-finish-load', () => {
     console.log('Main window loaded, sending db-url:', apiBaseUrl);
     mainWindow.webContents.send('db-url', apiBaseUrl);
   });

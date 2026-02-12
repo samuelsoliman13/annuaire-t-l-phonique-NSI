@@ -19,7 +19,8 @@
     "start": "electron .",
     "build:python": "python -m PyInstaller api_server.spec --distpath build/python --clean",
     "prebuild": "npm run build:python",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "pip": "python -m pip install -r requirements.txt"
   },
   "dependencies": {
     "electron-store": "^5.1.1"
