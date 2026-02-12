@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, net } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const Store = require('electron-store');
@@ -37,6 +37,7 @@ function createWindow() {
 
 // Fonction pour gérer l'initialisation de la base de données et la création de la fenêtre
 async function handleDbChoice(choice) {
+  console.log('Received db-choice:', JSON.stringify(choice, null, 2));
   if (choiceWindow) {
     choiceWindow.close();
     choiceWindow = null;
@@ -55,7 +56,7 @@ async function handleDbChoice(choice) {
       pythonProcess = spawn(apiExePath, ['--db-uri', dbUri]);
     } else {
       // In development, run the Python script
-      pythonProcess = spawn('python', ['api_boosted.py', '--db-uri', dbUri]);
+      pythonProcess = spawn('python', ['api_server.py', '--db-uri', dbUri]);
     }
 
     pythonProcess.stdout.on('data', (data) => {
@@ -108,6 +109,42 @@ ipcMain.on('forget-db-choice', () => {
   if (pythonProcess) pythonProcess.kill();
   app.relaunch();
   app.quit();
+});
+
+ipcMain.handle('ping-url', async (event, url) => {
+  try {
+    const healthUrl = new URL('/api/health', url).toString();
+    return new Promise((resolve) => {
+      const request = net.request(healthUrl);
+
+      const timeout = setTimeout(() => {
+        request.abort();
+      }, 5000); // 5-second timeout
+
+      request.on('response', (response) => {
+        clearTimeout(timeout);
+        resolve(response.statusCode === 200);
+      });
+
+      request.on('error', (error) => {
+        clearTimeout(timeout);
+        console.error(`Ping error: ${error.message}`);
+        resolve(false);
+      });
+
+      request.on('abort', () => {
+        clearTimeout(timeout);
+        // The 'abort' event can be triggered by the timeout itself, so a specific log isn't always needed,
+        // but it's good to resolve false in case of an external abort.
+        resolve(false);
+      });
+
+      request.end();
+    });
+  } catch (error) {
+    console.error(`Invalid URL for ping: ${url}`);
+    return false; // Invalid URL
+  }
 });
 
 

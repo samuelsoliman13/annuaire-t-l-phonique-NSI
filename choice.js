@@ -1,14 +1,57 @@
+const messageArea = document.getElementById('message-area');
+
+let messageTimeout;
+
+function displayMessage(messageText, isError = false) {
+    clearTimeout(messageTimeout); // Clear any existing timeout
+    messageArea.textContent = messageText;
+    messageArea.style.color = isError ? 'red' : 'green'; // Use green for success messages if any
+    messageArea.style.display = 'block'; // Ensure it's visible
+
+    messageTimeout = setTimeout(() => {
+        messageArea.textContent = '';
+        messageArea.style.display = 'none';
+    }, 5000); // Message disappears after 5 seconds
+}
+
 document.getElementById('local-db').addEventListener('click', () => {
     const remember = document.getElementById('remember-choice').checked;
     window.ipc.send('db-choice', { type: 'local', remember });
 });
 
-document.getElementById('remote-db').addEventListener('click', () => {
-    const url = document.getElementById('remote-url').value;
+document.getElementById('remote-db').addEventListener('click', async () => {
+    const urlInput = document.getElementById('remote-url');
+    const url = urlInput.value;
     const remember = document.getElementById('remember-choice').checked;
-    if (url) {
+    const remoteDbButton = document.getElementById('remote-db');
+    const originalButtonText = remoteDbButton.textContent;
+
+    // Clear any previous messages
+    displayMessage('');
+
+    if (!url) {
+        displayMessage('Please enter a remote URL.', true);
+        return;
+    }
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        displayMessage('Please enter a valid URL including http:// or https://', true);
+        return;
+    }
+
+    // Show loading state
+    remoteDbButton.disabled = true;
+    remoteDbButton.textContent = 'Pinging...';
+
+    const isReachable = await window.ipc.ping(url);
+
+    // Restore button state
+    remoteDbButton.disabled = false;
+    remoteDbButton.textContent = originalButtonText;
+
+    if (isReachable) {
         window.ipc.send('db-choice', { type: 'remote', url: url, remember });
     } else {
-        alert('Please enter a remote URL.');
+        displayMessage('Could not connect to the remote server. Please check the URL and ensure the server is running.', true);
     }
 });
