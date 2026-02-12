@@ -30,5 +30,6 @@ contextBridge.exposeInMainWorld('ipc', {
   },
   ping: async (url) => {
     return await ipcRenderer.invoke('ping-url', url);
-  }
+  },
+  showConfirmationDialog: (message) => ipcRenderer.invoke('show-confirmation-dialog', message)
 });

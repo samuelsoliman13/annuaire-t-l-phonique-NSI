@@ -20,7 +20,7 @@
     "dist": "electron-builder"
   },
   "dependencies": {
-    "electron-store": "^6.0.0"
+    "electron-store": "^5.1.1"
   },
   "devDependencies": {
     "electron-builder": "^26.4.0",

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, net } = require('electron');
+const { app, BrowserWindow, ipcMain, net, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const Store = require('electron-store');
@@ -145,6 +145,17 @@ ipcMain.handle('ping-url', async (event, url) => {
     console.error(`Invalid URL for ping: ${url}`);
     return false; // Invalid URL
   }
+});
+
+ipcMain.handle('show-confirmation-dialog', async (event, message) => {
+  const result = await dialog.showMessageBox(BrowserWindow.getFocusedWindow(), {
+    type: 'question',
+    buttons: ['Yes', 'No'],
+    defaultId: 1, // 'No' is the default button
+    title: 'Confirmation',
+    message: message,
+  });
+  return (result.response === 0); // Returns true if 'Yes' is clicked (index 0)
 });
 
 
