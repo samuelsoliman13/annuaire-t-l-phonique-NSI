@@ -1,17 +1,16 @@
-Cahier des Charges : Projet Annuaire Téléphonique
+ Projet Annuaire Téléphonique
+Equipe:
+-   Samuel Soliman
+-   Théo De la chapelle
 1. Présentation du Projet
-1.1 Contexte
-Le projet consiste à développer une application de gestion de contacts multiplateforme (Desktop) offrant une flexibilité totale sur le stockage des données. L'utilisateur doit pouvoir basculer entre un usage local autonome et une architecture client-serveur centralisée.
-
+1.1 publique cible:
+Pour les particuliers qui cherchent un moyen simple de stocker des contacts dans une application qui ne fonctionne pas obligatoirement avec le cloud nativement.
+Les entreprises qui se soucient de la sécurité de leur données (vie privée).
 1.2 Objectifs
-Fournir une interface intuitive pour la gestion CRUD (Création, Lecture, Mise à jour, Suppression) de contacts.
-
+Fournir une interface intuitive pour la gestion de contacts.
+Le projet consiste à développer une application de gestion de contacts multiplateforme (Desktop) offrant une flexibilité totale sur le stockage des données. L'utilisateur doit pouvoir basculer entre un usage local autonome et une architecture client-serveur centralisée.
 Permettre le choix entre une base de données locale (SQLite) et une API distante.
-
-Offrir une interface alternative en ligne de commande (CLI) pour les utilisateurs avancés.
-
-Garantir une séparation stricte entre l'interface utilisateur et la logique métier.
-
+Cahier des Charges :
 2. Besoins Fonctionnels
 2.1 Gestion des Contacts
 L'application doit permettre les actions suivantes :
@@ -33,12 +32,10 @@ Mémorisation : L'application doit pouvoir retenir le choix de l'utilisateur pou
 
 Réinitialisation : Possibilité de "penser à oublier" la préférence de connexion pour revenir au menu de choix.
 
-2.3 Interface CLI (Command Line Interface)
-Un script indépendant doit permettre d'effectuer les mêmes opérations CRUD directement depuis un terminal, en communiquant avec la logique métier Python.
 
 3. Architecture Technique
 3.1 Stack Technologique
-Frontend : Electron, HTML5, CSS3, JavaScript (Vanilla).
+Frontend : Electron, HTML5, CSS, JavaScript (Vanilla).
 
 Backend API : Python avec Flask.
 
@@ -52,8 +49,6 @@ REST API pour le dialogue Frontend <-> Backend Python.
 Electron Main Process : Orchestre l'application, gère les fenêtres et lance le serveur Python en mode local.
 
 Preload Script : Pont sécurisé exposant uniquement les fonctions nécessaires aux processus de rendu.
-
-Flask Backend : API RESTful centralisant la logique métier (AnnuaireManager).
 
 Electron Store : Stockage local des préférences utilisateur (configuration JSON).
 
@@ -74,11 +69,6 @@ L'utilisateur doit saisir l'URL de l'API cible.
 
 L'application ne lance pas de processus Python local mais effectue ses requêtes fetch vers l'URL fournie.
 
-4.3 Sécurité
-Utilisation de contextIsolation et nodeIntegration: false dans Electron.
-
-Gestion des politiques CORS via Flask-CORS pour autoriser les requêtes provenant de l'interface Electron.
-
 5. Livrables Attendus
 Code Source : Organisé en répertoires (frontend, backend, cli).
 
@@ -87,10 +77,3 @@ Documentation technique : Guide d'installation des dépendances (npm install, pi
 Fichier de configuration : requirements.txt pour Python et package.json pour Node.js.
 
 Exécutable : Procédure de build pour générer l'application desktop (ex: via Electron Forge ou Electron Builder).
-
-6. Évolutions Possibles (V2)
-Ajout d'un système d'authentification pour l'accès à l'API distante.
-
-Export/Import des contacts en format CSV ou VCF.
-
-Synchronisation automatique entre le mode local et un serveur distant.
