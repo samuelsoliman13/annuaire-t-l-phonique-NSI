@@ -17,6 +17,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
+    "build:python": "pyinstaller api_server.spec --distpath build/python --clean",
+    "prebuild": "npm run build:python",
     "dist": "electron-builder"
   },
   "dependencies": {

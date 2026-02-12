@@ -49,13 +49,10 @@ async function handleDbChoice(choice) {
   if (choice.type === 'local') {
     const dbUri = `sqlite:///${path.join(app.getPath('userData'), 'contacts.db')}`; // Utiliser le chemin des données de l'application pour SQLite
     
-    // Start the local backend
     if (app.isPackaged) {
-      // In production, run the packaged executable
       const apiExePath = path.join(process.resourcesPath, 'build', 'python', 'api_server.exe');
       pythonProcess = spawn(apiExePath, ['--db-uri', dbUri]);
     } else {
-      // In development, run the Python script
       pythonProcess = spawn('python', ['api_server.py', '--db-uri', dbUri]);
     }
 
@@ -66,17 +63,18 @@ async function handleDbChoice(choice) {
       console.error(`stderr: ${data}`);
     });
     apiBaseUrl = 'http://localhost:5001';
-    // Give the Python server a moment to start up
     await new Promise(resolve => setTimeout(resolve, 3000)); 
     console.log('Local Python server started with DB URI:', dbUri);
   } else {
-    // For remote, the API URL is provided directly, no Python process spawned here
     apiBaseUrl = choice.url;
     console.log('Using remote API URL:', apiBaseUrl);
   }
-
-  // Send the API base URL to the renderer process
-  mainWindow.webContents.send('db-url', apiBaseUrl);
+  
+ //Attendre que la page soit chargée
+  mainWindow.webContents.on('did-finish-load', () => {
+    console.log('Main window loaded, sending db-url:', apiBaseUrl);
+    mainWindow.webContents.send('db-url', apiBaseUrl);
+  });
 
   // Sauvegarder le choix si 'remember' est vrai
   if (choice.remember) {
@@ -85,7 +83,6 @@ async function handleDbChoice(choice) {
     store.delete('dbChoice');
   }
 }
-
 
 app.whenReady().then(() => {
   const rememberedChoice = store.get('dbChoice');

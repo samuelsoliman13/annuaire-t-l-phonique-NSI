@@ -12,7 +12,7 @@ pip install -r requirements.txt
 python api.py
 ```
 
-L'API sera disponible sur `http://localhost:5000`
+L'API sera disponible sur `http://localhost:5001`
 
 ---
 

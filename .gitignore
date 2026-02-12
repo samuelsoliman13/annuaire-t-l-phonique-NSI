@@ -1,13 +1,11 @@
 __pycache__/
 node_modules
-<<<<<<< HEAD
 .venv
-contacts.json
-=======
 contacts.json
 dist
 instance
 build
 venv
 new_venv
->>>>>>> 2d0bb6680990b58ba51f6bed7800aed03b7daefc
+.idea
+.vscode

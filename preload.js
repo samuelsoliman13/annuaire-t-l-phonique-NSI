@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 let dbUrl;
 
 ipcRenderer.on('db-url', (event, url) => {
+  console.log('Preload received db-url:', url);
   dbUrl = url;
 });
 
@@ -10,14 +11,16 @@ contextBridge.exposeInMainWorld('api', {
   getDbUrl: () => dbUrl,
   fetch: (url, options) => {
     if (!dbUrl) {
+      console.error('Database URL not set!');
       return Promise.reject('Database URL not set');
     }
     const fullUrl = `${dbUrl}${url}`;
-    console.log(`Fetching from: ${fullUrl}`); // Log the full URL
+    console.log(`Fetching from: ${fullUrl}`);
     return fetch(fullUrl, options).then(res => res.json());
   },
   on: (channel, callback) => {
-    ipcRenderer.on(channel, callback);
+    // Passer les arguments de l'événement au callback
+    ipcRenderer.on(channel, (event, ...args) => callback(...args));
   },
   forgetDbChoice: () => {
     ipcRenderer.send('forget-db-choice');
