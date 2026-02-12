@@ -40,7 +40,8 @@
       "choice.css",
       "index.js",
       "choice.js",
-      "node_modules/**/*"
+      "node_modules/**/*",
+      "icon.png"
     ],
     "extraResources": [
       {

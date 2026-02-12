@@ -13,6 +13,7 @@ function createChoiceWindow() {
   choiceWindow = new BrowserWindow({
     width: 400,
     height: 250, // Hauteur augmentée pour accommoder la case à cocher
+    icon: path.join(__dirname, 'icon.png'), // Assurez-vous d'avoir une icône à ce chemin
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
