@@ -93,6 +93,13 @@ async function handleDbChoice(choice) {
   let apiBaseUrl;
 
   if (choice.type === 'local') {
+    // Tuer le processus Python précédent s'il existe
+    if (pythonProcess) {
+      console.log('Killing previous Python process');
+      pythonProcess.kill();
+      pythonProcess = null;
+    }
+
     const dbUri = `sqlite:///${path.join(app.getPath('userData'), 'contacts.db')}`; // Utiliser le chemin des données de l'application pour SQLite
     
     if (app.isPackaged) {
@@ -210,7 +217,14 @@ ipcMain.handle('show-confirmation-dialog', async (event, message) => {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
     if (pythonProcess) {
-      pythonProcess.kill();
+      console.log('Killing Python process on app close');
+      pythonProcess.kill('SIGTERM');
+      // Forcer la termination après 3 secondes si le processus n'a pas fermé
+      setTimeout(() => {
+        if (pythonProcess) {
+          pythonProcess.kill('SIGKILL');
+        }
+      }, 3000);
     }
     app.quit();
   }
