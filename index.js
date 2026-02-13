@@ -186,7 +186,7 @@ function editContact(id) {
 }
 
 // Charger les contacts lorsque l'URL de la base de données est définie
-window.api.once('db-url', () => {
+window.api.on('db-url', () => {
     console.log('db-url event received in renderer process. Calling loadContacts().');
     loadContacts();
 });
