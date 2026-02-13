@@ -37,6 +37,50 @@ function createWindow() {
   mainWindow.loadFile('index.html');
 }
 
+// Fonction pour attendre que le serveur soit prêt
+async function waitForServer(url, maxRetries = 30) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const request = net.request(new URL('/api/health', url).toString());
+      const isReady = await new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          request.abort();
+          resolve(false);
+        }, 2000);
+
+        request.on('response', (response) => {
+          clearTimeout(timeout);
+          resolve(response.statusCode === 200);
+        });
+
+        request.on('error', () => {
+          clearTimeout(timeout);
+          resolve(false);
+        });
+
+        request.on('abort', () => {
+          clearTimeout(timeout);
+          resolve(false);
+        });
+
+        request.end();
+      });
+
+      if (isReady) {
+        console.log(`Server is ready after ${i} retries`);
+        return true;
+      }
+    } catch (error) {
+      console.error(`Retry ${i}: ${error.message}`);
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 500)); // Attendre 500ms avant le prochain essai
+  }
+
+  console.error('Server did not respond after maximum retries');
+  return false;
+}
+
 // Fonction pour gérer l'initialisation de la base de données et la création de la fenêtre
 async function handleDbChoice(choice) {
   console.log('Received db-choice:', JSON.stringify(choice, null, 2));
@@ -65,7 +109,12 @@ async function handleDbChoice(choice) {
       console.error(`stderr: ${data}`);
     });
     apiBaseUrl = 'http://127.0.0.1:5001';
-    await new Promise(resolve => setTimeout(resolve, 3000)); 
+    
+    // Attendre que le serveur soit vraiment prêt
+    const serverReady = await waitForServer(apiBaseUrl);
+    if (!serverReady) {
+      console.error('Failed to start local Python server');
+    }
     console.log('Local Python server started with DB URI:', dbUri);
   } else {
     apiBaseUrl = choice.url;

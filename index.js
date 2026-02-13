@@ -56,6 +56,22 @@ contactForm.addEventListener('submit', (event) => {
     adresse_travail: adresseTravailInput.value,
   };
 
+  function resetButton() {
+    submitButton.classList.remove('saving');
+    submitButton.textContent = 'Enregistrer';
+    submitButton.disabled = false;
+  }
+
+  function showError(message) {
+    const errorMessage = document.createElement('div');
+    errorMessage.classList.add('error-message');
+    errorMessage.textContent = message;
+    contactForm.prepend(errorMessage);
+    setTimeout(() => {
+      errorMessage.remove();
+    }, 5000);
+  }
+
   if (id) {
     // Mettre à jour le contact existant
     window.api.fetch(`/api/contacts/${id}`, {
@@ -73,13 +89,15 @@ contactForm.addEventListener('submit', (event) => {
         successMessage.remove();
       }, 3000);
 
-      submitButton.classList.remove('saving');
-      submitButton.textContent = 'Enregistrer';
-      submitButton.disabled = false;
+      resetButton();
       const cancelButton = contactForm.querySelector('.cancel-btn');
       if (cancelButton) {
         cancelButton.remove();
       }
+    }).catch(err => {
+      console.error('Error updating contact:', err);
+      showError('Erreur lors de la mise à jour du contact: ' + err.message);
+      resetButton();
     });
   } else {
     // Ajouter un nouveau contact
@@ -98,9 +116,11 @@ contactForm.addEventListener('submit', (event) => {
         successMessage.remove();
       }, 3000);
       
-      submitButton.classList.remove('saving');
-      submitButton.textContent = 'Enregistrer';
-      submitButton.disabled = false;
+      resetButton();
+    }).catch(err => {
+      console.error('Error adding contact:', err);
+      showError('Erreur lors de l\'ajout du contact: ' + err.message);
+      resetButton();
     });
   }
 });

@@ -16,7 +16,18 @@ contextBridge.exposeInMainWorld('api', {
     }
     const fullUrl = `${dbUrl}${url}`;
     console.log(`Fetching from: ${fullUrl}`);
-    return fetch(fullUrl, options).then(res => res.json());
+    return fetch(fullUrl, options)
+      .then(res => {
+        if (!res.ok) {
+          console.error(`HTTP Error: ${res.status} ${res.statusText}`);
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
+      .catch(err => {
+        console.error(`Fetch error: ${err.message}`);
+        throw err;
+      });
   },
   on: (channel, callback) => {
     // Passer les arguments de l'événement au callback
