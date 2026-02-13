@@ -18,11 +18,15 @@ contextBridge.exposeInMainWorld('api', {
     console.log(`Fetching from: ${fullUrl}`);
     return fetch(fullUrl, options)
       .then(res => {
-        if (!res.ok) {
-          console.error(`HTTP Error: ${res.status} ${res.statusText}`);
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-        }
-        return res.json();
+        return res.json().then(data => {
+          if (!res.ok) {
+            console.error(`HTTP Error: ${res.status} ${res.statusText}`, data);
+            // Si le serveur retourne un objet avec "erreur", utiliser ce message
+            const errorMsg = data.erreur || `HTTP ${res.status}: ${res.statusText}`;
+            throw new Error(errorMsg);
+          }
+          return data;
+        });
       })
       .catch(err => {
         console.error(`Fetch error: ${err.message}`);
