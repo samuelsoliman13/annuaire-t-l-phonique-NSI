@@ -32,7 +32,9 @@ def validate_email(email: str) -> Tuple[bool, str]:
     
     if '@' not in email:
         return False, "L'email doit contenir un @"
-    
+    if '.' not in email:
+        return False, "L'email doit contenir un ."
+
     # Regex basique pour valider le format email
     email_regex = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
     if not re.match(email_regex, email):
