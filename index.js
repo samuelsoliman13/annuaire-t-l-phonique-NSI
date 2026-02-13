@@ -37,9 +37,12 @@ function validateContact() {
 }
 
 function loadContacts() {
-  window.api.fetch('/api/contacts')
+  return window.api.fetch('/api/contacts')
     .then(contacts => {
       contactList.innerHTML = '';
+      if (!Array.isArray(contacts)) {
+        throw new Error('Les contacts reçus ne sont pas un tableau valide');
+      }
       contacts.forEach(contact => {
         const li = document.createElement('li');
         li.innerHTML = `
@@ -109,6 +112,13 @@ contactForm.addEventListener('submit', (event) => {
     }, 5000);
   }
 
+  function formatErrorMessage(err) {
+    if (err instanceof Error) {
+      return err.message || 'Une erreur inconnue s\'est produite';
+    }
+    return String(err) || 'Une erreur inconnue s\'est produite';
+  }
+
   if (id) {
     // Mettre à jour le contact existant
     window.api.fetch(`/api/contacts/${id}`, {
@@ -117,7 +127,8 @@ contactForm.addEventListener('submit', (event) => {
       body: JSON.stringify(contactData),
     }).then(() => {
       contactForm.reset();
-      loadContacts();
+      return loadContacts();
+    }).then(() => {
       const successMessage = document.createElement('div');
       successMessage.classList.add('success-message');
       successMessage.textContent = 'Contact mis à jour avec succès!';
@@ -133,7 +144,7 @@ contactForm.addEventListener('submit', (event) => {
       }
     }).catch(err => {
       console.error('Error updating contact:', err);
-      showError('Erreur lors de la mise à jour du contact: ' + err.message);
+      showError('Erreur lors de la mise à jour du contact: ' + formatErrorMessage(err));
       resetButton();
     });
   } else {
@@ -144,7 +155,8 @@ contactForm.addEventListener('submit', (event) => {
       body: JSON.stringify(contactData),
     }).then(() => {
       contactForm.reset();
-      loadContacts();
+      return loadContacts();
+    }).then(() => {
       const successMessage = document.createElement('div');
       successMessage.classList.add('success-message');
       successMessage.textContent = 'Contact ajouté avec succès!';
@@ -155,7 +167,7 @@ contactForm.addEventListener('submit', (event) => {
       
       resetButton();
     }).catch(err => {
-      console.error('Error adding contact:', err);
+      console.error('Error adding contact:', err);formatErrorMessage(err)
       showError('Erreur lors de l\'ajout du contact: ' + err.message);
       resetButton();
     });

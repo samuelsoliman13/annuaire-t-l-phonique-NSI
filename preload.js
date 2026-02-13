@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld('api', {
   fetch: (url, options) => {
     if (!dbUrl) {
       console.error('Database URL not set!');
-      return Promise.reject('Database URL not set');
+      return Promise.reject(new Error('Database URL not set'));
     }
     const fullUrl = `${dbUrl}${url}`;
     console.log(`Fetching from: ${fullUrl}`);
