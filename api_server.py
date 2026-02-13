@@ -2,9 +2,10 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 import os
 import argparse
+import re
 
 parser = argparse.ArgumentParser(description="Run the Flask for Annuaire Téléphonique.")
 parser.add_argument('--db-uri', type=str, default=None,
@@ -21,6 +22,37 @@ CORS(app, resources={
         "allow_headers": ["Content-Type"]
     }
 })
+
+# Fonctions de validation
+def validate_email(email: str) -> Tuple[bool, str]:
+    """Valide le format de l'email."""
+    email = email.strip()
+    if not email:
+        return False, "L'email ne peut pas être vide"
+    
+    if '@' not in email:
+        return False, "L'email doit contenir un @"
+    
+    # Regex basique pour valider le format email
+    email_regex = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+    if not re.match(email_regex, email):
+        return False, "Format d'email invalide"
+    
+    return True, ""
+
+def validate_telephone(telephone: str) -> Tuple[bool, str]:
+    """Valide le format du téléphone (exactement 10 chiffres)."""
+    telephone = telephone.strip()
+    if not telephone:
+        return False, "Le téléphone ne peut pas être vide"
+    
+    # Extraire seulement les chiffres
+    digits_only = re.sub(r'\D', '', telephone)
+    
+    if len(digits_only) != 10:
+        return False, "Le téléphone doit contenir exactement 10 chiffres"
+    
+    return True, ""
 
 # Initialiser SQLAlchemy
 db = SQLAlchemy()
@@ -181,6 +213,16 @@ def create_contact():
             if champ not in data or not data[champ]:
                 return jsonify({"erreur": f"Le champ '{champ}' est requis"}), 400
         
+        # Valider l'email
+        email_valid, email_error = validate_email(data['email'])
+        if not email_valid:
+            return jsonify({"erreur": email_error}), 400
+        
+        # Valider le téléphone
+        phone_valid, phone_error = validate_telephone(data['telephone'])
+        if not phone_valid:
+            return jsonify({"erreur": phone_error}), 400
+        
         contact = annuaire.ajouter_contact(
             nom=data['nom'],
             prenom=data['prenom'],
@@ -200,6 +242,19 @@ def update_contact(contact_id):
     try:
         # request.get_json() de Flask peut renvoyer None si Content-Type n'est pas application/json
         data = request.get_json() or {} 
+        
+        # Valider l'email s'il est fourni
+        if 'email' in data and data['email']:
+            email_valid, email_error = validate_email(data['email'])
+            if not email_valid:
+                return jsonify({"erreur": email_error}), 400
+        
+        # Valider le téléphone s'il est fourni
+        if 'telephone' in data and data['telephone']:
+            phone_valid, phone_error = validate_telephone(data['telephone'])
+            if not phone_valid:
+                return jsonify({"erreur": phone_error}), 400
+        
         contact_modifie = annuaire.modifier_contact(contact_id, **data)
         if not contact_modifie:
             return jsonify({"erreur": "Contact non trouvé"}), 404

@@ -11,6 +11,31 @@ const adresseTravailInput = document.getElementById('adresse_travail');
 const forgetChoiceButton = document.getElementById('forget-choice');
 const clearSearchBtn = document.getElementById('clear-search-btn');
 
+// Fonction de validation du formulaire
+function validateContact() {
+  const email = emailInput.value.trim();
+  const telephone = telInput.value.trim();
+
+  // Vérifier l'email (doit contenir @)
+  if (!email.includes('@')) {
+    return { valid: false, message: 'L\'email doit contenir un @' };
+  }
+
+  // Vérifier le format basique de l'email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { valid: false, message: 'Format d\'email invalide' };
+  }
+
+  // Vérifier le téléphone (exactement 10 chiffres)
+  const phoneDigits = telephone.replace(/\D/g, '');
+  if (phoneDigits.length !== 10) {
+    return { valid: false, message: 'Le téléphone doit contenir exactement 10 chiffres' };
+  }
+
+  return { valid: true, message: '' };
+}
+
 function loadContacts() {
   window.api.fetch('/api/contacts')
     .then(contacts => {
@@ -38,6 +63,18 @@ function loadContacts() {
 // Gérer la soumission du formulaire de contact
 contactForm.addEventListener('submit', (event) => {
   event.preventDefault();
+  
+  // Valider les données avant envoi
+  const validation = validateContact();
+  if (!validation.valid) {
+    const errorMsg = document.createElement('div');
+    errorMsg.classList.add('error-message');
+    errorMsg.textContent = validation.message;
+    contactForm.prepend(errorMsg);
+    setTimeout(() => errorMsg.remove(), 5000);
+    return;
+  }
+  
   const id = contactIdInput.value;
   const submitButton = contactForm.querySelector('button[type="submit"]');
   const originalText = submitButton.textContent;
