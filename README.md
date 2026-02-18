@@ -164,7 +164,7 @@ annuaire-téléphonique/
 ---
 ## Diagramme d'usage
 '''
-![Description](./assets/screenshot.png)
+![Description](./diagrame.png)
 '''
 ---
 ## 🛠️ Stack technique
