@@ -6,19 +6,19 @@ Une application desktop multiplateforme de gestion de contacts, construite avec 
 
 ---
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
-- ➕ **Ajouter** un contact (nom, prénom, email, téléphone, adresse, adresse de travail)
-- ✏️ **Modifier** un contact existant
-- 🗑️ **Supprimer** un contact (avec confirmation)
-- 🔍 **Rechercher** un contact par nom, prénom ou email
-- 💾 **Choix du stockage** : base locale SQLite ou API distante
-- 🔁 **Mémorisation** du choix de connexion au lancement
-- ✅ **Validation** des champs (format email, exactement 10 chiffres pour le téléphone)
+- **Ajouter** un contact (nom, prénom, email, téléphone, adresse, adresse de travail)
+- **Modifier** un contact existant
+- **Supprimer** un contact (avec confirmation)
+- **Rechercher** un contact par nom, prénom ou email
+- **Choix du stockage** : base locale SQLite ou API distante
+- **Mémorisation** du choix de connexion au lancement
+- **Validation** des champs (format email, exactement 10 chiffres pour le téléphone)
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -53,7 +53,7 @@ Une application desktop multiplateforme de gestion de contacts, construite avec 
 
 ---
 
-## 🚀 Installation & Lancement
+## Installation & Lancement
 
 ### Prérequis
 
@@ -84,11 +84,11 @@ Au lancement, une fenêtre vous propose trois options :
 
 | Option | Description |
 |--------|-------------|
-| 🖥️ **Local Database** | Lance automatiquement le serveur Flask en arrière-plan avec SQLite |
-| 🌐 **Théo's Server** | Se connecte à `https://annuaire.dlchost.com` (vérifie la disponibilité) |
-| 🔗 **Remote Database** | Saisir l'URL d'une API distante compatible |
+| **Local Database** | Lance automatiquement le serveur Flask en arrière-plan avec SQLite |
+| **Théo's Server** | Se connecte à `https://annuaire.dlchost.com` (vérifie la disponibilité) |
+| **Remote Database** | Saisir l'URL d'une API distante compatible |
 
-> 💡 Cochez **"Remember my choice"** pour ne plus voir cette fenêtre au prochain lancement.
+>  Cochez **"Remember my choice"** pour ne plus voir cette fenêtre au prochain lancement.
 
 ---
 
@@ -126,7 +126,7 @@ curl -X POST http://localhost:5001/api/contacts \
 
 ---
 
-## 📦 Build — Générer l'exécutable
+## Build — Générer l'exécutable
 
 ```bash
 # Build du binaire Python (PyInstaller)
@@ -162,7 +162,11 @@ annuaire-téléphonique/
 ```
 
 ---
-
+## Diagramme d'usage
+'''
+![Description](./assets/screenshot.png)
+'''
+---
 ## 🛠️ Stack technique
 
 | Couche | Technologie |
