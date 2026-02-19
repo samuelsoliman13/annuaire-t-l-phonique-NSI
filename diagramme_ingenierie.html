@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Architecture — Annuaire Téléphonique</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg: #0a0c10;
+  --surface: #0f1318;
+  --surface2: #151a22;
+  --border: #1e2730;
+  --border2: #263040;
+  --text: #c8d6e5;
+  --text-dim: #4a5a6a;
+  --text-mid: #7a90a0;
+  --accent-blue: #38bdf8;
+  --accent-green: #4ade80;
+  --accent-purple: #a78bfa;
+  --accent-amber: #fbbf24;
+  --accent-red: #f87171;
+  --accent-cyan: #22d3ee;
+  --accent-pink: #f472b6;
+  --electron: #38bdf8;
+  --flask: #f87171;
+  --db: #4ade80;
+  --ipc: #a78bfa;
+  --store: #fbbf24;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 0 80px;
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════ */
+header {
+  border-bottom: 1px solid var(--border2);
+  padding: 28px 48px 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  background: linear-gradient(180deg, #0d1117 0%, var(--bg) 100%);
+}
+.header-title { font-size: 1.35rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+.header-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-dim); margin-top: 4px; }
+.header-meta { text-align: right; }
+.header-meta .badge {
+  display: inline-block; padding: 3px 10px; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  background: var(--surface2); border: 1px solid var(--border2); color: var(--text-mid);
+  margin-left: 6px;
+}
+
+/* ═══════════════════════════════════════════════
+   NAV TABS
+═══════════════════════════════════════════════ */
+nav {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--border2);
+  padding: 0 48px;
+  background: var(--surface);
+  position: sticky; top: 0; z-index: 100;
+}
+.tab {
+  padding: 14px 22px; cursor: pointer;
+  font-size: 0.8rem; font-weight: 600; letter-spacing: 0.5px;
+  color: var(--text-dim); border-bottom: 2px solid transparent;
+  transition: all .2s; font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--text-mid); }
+.tab.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); }
+
+/* ═══════════════════════════════════════════════
+   SECTIONS
+═══════════════════════════════════════════════ */
+section { display: none; padding: 40px 48px; max-width: 1200px; }
+section.active { display: block; }
+
+.section-heading {
+  font-size: 0.65rem; font-family: 'JetBrains Mono', monospace;
+  color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase;
+  margin-bottom: 28px; display: flex; align-items: center; gap: 14px;
+}
+.section-heading::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+
+/* ═══════════════════════════════════════════════
+   COMPOSANTS — grille principale
+═══════════════════════════════════════════════ */
+.comp-grid {
+  display: grid;
+  grid-template-columns: 1fr 80px 1fr;
+  grid-template-rows: auto;
+  gap: 0;
+  align-items: start;
+}
+
+.comp-col { display: flex; flex-direction: column; gap: 12px; }
+
+/* Boîte composant */
+.comp-box {
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.comp-box:hover { border-color: var(--border2); }
+
+.comp-header {
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 10px;
+}
+.comp-icon { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.comp-name { font-size: 0.82rem; font-weight: 700; }
+.comp-stereotype {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  color: var(--text-dim); margin-left: auto;
+  border: 1px solid var(--border2); padding: 1px 6px; border-radius: 3px;
+}
+.comp-file {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  color: var(--text-dim); padding: 4px 14px 0;
+}
+
+.comp-body { padding: 8px 14px 12px; }
+.comp-iface { margin-bottom: 8px; }
+.iface-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.iface-item {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  color: var(--text-mid); padding: 2px 8px; margin: 2px 0;
+  background: var(--surface2); border-radius: 3px;
+  border-left: 2px solid var(--border2);
+  display: flex; align-items: center; gap: 6px;
+}
+.iface-item.provide { border-left-color: var(--accent-green); }
+.iface-item.require { border-left-color: var(--accent-red); }
+.iface-item.event { border-left-color: var(--accent-purple); }
+
+.dep-list { list-style: none; }
+.dep-list li {
+  font-size: 0.72rem; color: var(--text-mid);
+  padding: 3px 0; display: flex; align-items: flex-start; gap: 8px;
+}
+.dep-list li::before { content: '·'; color: var(--text-dim); flex-shrink: 0; }
+
+/* Couleurs par rôle */
+.role-electron .comp-icon { background: var(--electron); }
+.role-electron .comp-name { color: var(--electron); }
+.role-flask .comp-icon { background: var(--flask); }
+.role-flask .comp-name { color: var(--flask); }
+.role-db .comp-icon { background: var(--db); }
+.role-db .comp-name { color: var(--db); }
+.role-ipc .comp-icon { background: var(--ipc); }
+.role-ipc .comp-name { color: var(--ipc); }
+.role-store .comp-icon { background: var(--store); }
+.role-store .comp-name { color: var(--store); }
+
+/* Colonne flèches */
+.conn-col {
+  display: flex; flex-direction: column;
+  align-items: center; padding-top: 80px; gap: 0;
+}
+.conn-block {
+  display: flex; flex-direction: column; align-items: center;
+  flex: 1; width: 100%;
+}
+.conn-line { width: 1px; background: var(--border2); flex: 1; min-height: 14px; }
+.conn-diamond {
+  width: 7px; height: 7px; background: var(--border2);
+  transform: rotate(45deg); margin: 3px 0; flex-shrink: 0;
+}
+.conn-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  color: var(--text-dim); background: var(--bg);
+  padding: 2px 6px; border: 1px solid var(--border2); border-radius: 3px;
+  white-space: nowrap; text-align: center; margin: 4px 0;
+}
+.conn-arrow {
+  font-size: 0.75rem; color: var(--text-dim); margin: 2px 0;
+}
+
+/* ═══════════════════════════════════════════════
+   DIAGRAMME DE CLASSES
+═══════════════════════════════════════════════ */
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.class-box {
+  border: 1px solid var(--border2);
+  border-radius: 6px; overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--surface);
+}
+.class-title-bar {
+  padding: 8px 12px; border-bottom: 1px solid var(--border2);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.class-stereotype { font-size: 0.58rem; color: var(--text-dim); font-style: italic; }
+.class-name { font-size: 0.88rem; font-weight: 700; }
+.class-section { border-bottom: 1px solid var(--border2); }
+.class-section-label {
+  font-size: 0.55rem; color: var(--text-dim); letter-spacing: 2px;
+  text-transform: uppercase; padding: 4px 12px 2px;
+}
+.class-attr, .class-method {
+  font-size: 0.67rem; color: var(--text-mid);
+  padding: 2px 12px 2px 18px; display: flex; gap: 6px; align-items: baseline;
+}
+.class-attr .vis, .class-method .vis { color: var(--text-dim); flex-shrink: 0; }
+.class-attr .name { color: var(--text); }
+.class-attr .type { color: var(--text-dim); font-size: 0.6rem; }
+.class-method .name { color: var(--accent-blue); }
+.class-method .ret { color: var(--text-dim); font-size: 0.6rem; }
+
+/* Relation lines entre classes */
+.class-relations { margin-top: 20px; }
+.rel-row {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+  padding: 5px 0; border-bottom: 1px solid var(--border); color: var(--text-mid);
+}
+.rel-from { color: var(--text); width: 160px; flex-shrink: 0; text-align: right; }
+.rel-arrow { color: var(--text-dim); font-size: 0.9rem; flex-shrink: 0; }
+.rel-to { color: var(--text); width: 160px; flex-shrink: 0; }
+.rel-label { color: var(--text-dim); font-size: 0.6rem; flex: 1; }
+.rel-card { color: var(--accent-amber); font-size: 0.6rem; width: 40px; text-align: center; }
+
+/* ═══════════════════════════════════════════════
+   DIAGRAMME DE SÉQUENCE
+═══════════════════════════════════════════════ */
+.seq-wrapper {
+  overflow-x: auto; padding-bottom: 10px;
+}
+
+.seq-diagram {
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 820px; position: relative;
+}
+
+/* Participants */
+.seq-participants {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--border2);
+  padding-bottom: 16px; margin-bottom: 0;
+}
+.seq-part {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+}
+.seq-part-box {
+  padding: 7px 12px; border-radius: 5px;
+  border: 1px solid var(--border2); font-size: 0.7rem; font-weight: 600;
+  text-align: center; background: var(--surface2); white-space: nowrap;
+}
+.seq-part-life {
+  width: 1px; background: var(--border2);
+  flex: 1; margin-top: 6px;
+}
+
+/* Messages */
+.seq-messages { position: relative; }
+.seq-msg {
+  display: flex; align-items: center; position: relative;
+  min-height: 32px; padding: 0 0;
+}
+
+/* Lignes de vie sous forme de grille */
+.seq-lifelines {
+  display: flex; position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;
+}
+.seq-life { flex: 1; border-right: 1px dashed var(--border); position: relative; }
+.seq-life:last-child { border-right: none; }
+
+/* Message arrow */
+.msg-row {
+  display: grid;
+  font-size: 0.68rem;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  grid-template-columns: 130px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+.msg-time { color: var(--text-dim); text-align: right; font-size: 0.6rem; }
+.msg-body { display: flex; align-items: center; gap: 8px; }
+.msg-from { color: var(--text); font-weight: 600; min-width: 80px; }
+.msg-arrow-line {
+  flex: 1; display: flex; align-items: center; gap: 0; position: relative;
+  height: 16px;
+}
+.msg-line { height: 1px; flex: 1; }
+.msg-head { font-size: 0.8rem; line-height: 1; }
+.msg-label {
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+  font-size: 0.62rem; color: var(--text-mid); white-space: nowrap;
+  background: var(--bg); padding: 0 4px;
+}
+.msg-to { color: var(--text); font-weight: 600; min-width: 80px; }
+.msg-note { font-size: 0.63rem; color: var(--text-dim); font-style: italic; }
+
+/* Groupes / frames */
+.seq-group {
+  border: 1px solid var(--border2); border-radius: 4px;
+  margin: 10px 0; overflow: hidden;
+}
+.seq-group-header {
+  padding: 4px 12px; background: var(--surface2);
+  font-size: 0.62rem; color: var(--text-mid);
+  display: flex; align-items: center; gap: 8px;
+}
+.seq-group-kw { font-weight: 700; color: var(--accent-purple); }
+.seq-group-body { padding: 0 0; }
+
+/* ═══════════════════════════════════════════════
+   DÉPLOIEMENT
+═══════════════════════════════════════════════ */
+.deploy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.deploy-node {
+  border: 1px solid var(--border2);
+  border-radius: 8px; overflow: hidden;
+  background: var(--surface);
+}
+.deploy-node-header {
+  padding: 10px 16px; border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2);
+}
+.deploy-node-icon { font-size: 1rem; }
+.deploy-node-name { font-size: 0.82rem; font-weight: 700; }
+.deploy-node-type { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-dim); margin-left: auto; }
+.deploy-node-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+.deploy-artifact {
+  border: 1px solid var(--border2); border-radius: 5px;
+  padding: 8px 12px; background: var(--bg); font-family: 'JetBrains Mono', monospace;
+}
+.deploy-artifact-name { font-size: 0.75rem; font-weight: 600; }
+.deploy-artifact-type { font-size: 0.6rem; color: var(--text-dim); margin-bottom: 6px; }
+.deploy-artifact-deps { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.dep-badge {
+  font-size: 0.58rem; padding: 1px 7px; border-radius: 3px;
+  border: 1px solid var(--border2); color: var(--text-dim);
+}
+.dep-badge.electron-dep { border-color: #38bdf840; color: var(--electron); }
+.dep-badge.flask-dep { border-color: #f8717140; color: var(--flask); }
+.dep-badge.db-dep { border-color: #4ade8040; color: var(--db); }
+
+.deploy-comm {
+  border-top: 1px solid var(--border2); margin-top: 16px; padding-top: 16px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.deploy-comm-title { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 2px; font-family: 'JetBrains Mono', monospace; }
+.comm-line {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text-mid);
+}
+.comm-proto {
+  padding: 2px 8px; border-radius: 3px; font-size: 0.6rem;
+  font-weight: 700; flex-shrink: 0;
+}
+.proto-ipc { background: #2d1f4a; color: var(--ipc); }
+.proto-http { background: #1a2d1a; color: var(--db); }
+.proto-sql { background: #2d2a1a; color: var(--store); }
+
+/* ═══════════════════════════════════════════════
+   TABLES / misc
+═══════════════════════════════════════════════ */
+table {
+  width: 100%; border-collapse: collapse;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+}
+th {
+  padding: 8px 12px; text-align: left;
+  border-bottom: 1px solid var(--border2);
+  color: var(--text-dim); font-size: 0.6rem;
+  text-transform: uppercase; letter-spacing: 2px; font-weight: 600;
+}
+td {
+  padding: 7px 12px; border-bottom: 1px solid var(--border);
+  color: var(--text-mid); vertical-align: top;
+}
+td:first-child { color: var(--text); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+
+.method-badge {
+  display: inline-block; padding: 1px 7px; border-radius: 3px;
+  font-size: 0.62rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+}
+.GET    { background: #064e3b; color: #34d399; }
+.POST   { background: #1e3a5f; color: #60a5fa; }
+.PUT    { background: #3b2a00; color: #fbbf24; }
+.DELETE { background: #3b0a0a; color: #f87171; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════════
+   DIAGRAMME CODE (arbre de fichiers + call graph)
+═══════════════════════════════════════════════ */
+.code-layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; align-items: start; }
+.file-tree {
+  border: 1px solid var(--border2); border-radius: 8px;
+  background: var(--surface); overflow: hidden; position: sticky; top: 80px;
+}
+.file-tree-header {
+  padding: 10px 14px; border-bottom: 1px solid var(--border2);
+  font-size: 0.7rem; font-weight: 700; color: var(--text-mid);
+  font-family: 'JetBrains Mono', monospace; background: var(--surface2);
+  display: flex; align-items: center; gap: 8px;
+}
+.tree-node {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+  padding: 4px 14px; color: var(--text-mid);
+  display: flex; align-items: center; gap: 8px;
+  cursor: default; border-bottom: 1px solid var(--border);
+  transition: background .15s;
+}
+.tree-node:hover { background: var(--surface2); }
+.tree-node:last-child { border-bottom: none; }
+.tree-node.folder { color: var(--accent-amber); font-weight: 600; }
+.tree-node.indent1 { padding-left: 28px; }
+.tree-node.indent2 { padding-left: 42px; }
+.tree-icon { flex-shrink: 0; font-size: 0.75rem; }
+.tree-name { flex: 1; }
+.tree-badge {
+  font-size: 0.55rem; padding: 1px 5px; border-radius: 3px;
+  border: 1px solid var(--border2); color: var(--text-dim); flex-shrink: 0;
+}
+
+.call-graph { display: flex; flex-direction: column; gap: 14px; }
+.cg-module {
+  border: 1px solid var(--border2); border-radius: 8px;
+  background: var(--surface); overflow: hidden;
+}
+.cg-module-header {
+  padding: 9px 14px; border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cg-module-file { font-size: 0.78rem; font-weight: 700; }
+.cg-module-path { font-size: 0.6rem; color: var(--text-dim); margin-left: auto; }
+.cg-module-body { padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.cg-fn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  padding: 5px 10px; border-radius: 5px;
+  border: 1px solid var(--border2); background: var(--surface2);
+  display: flex; flex-direction: column; gap: 2px;
+  min-width: 140px;
+}
+.cg-fn-name { font-weight: 600; }
+.cg-fn-sig { font-size: 0.58rem; color: var(--text-dim); }
+.cg-fn-calls { font-size: 0.58rem; color: var(--text-dim); margin-top: 3px; border-top: 1px solid var(--border); padding-top: 3px; }
+.cg-fn-calls span { color: var(--accent-blue); }
+
+.cg-arrows {
+  margin-top: 16px; border: 1px solid var(--border2); border-radius: 8px;
+  background: var(--surface); overflow: hidden;
+}
+.cg-arrow-row {
+  display: grid; grid-template-columns: 160px 30px 160px 1fr;
+  align-items: center; padding: 5px 14px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.67rem; color: var(--text-mid);
+}
+.cg-arrow-row:last-child { border-bottom: none; }
+.cg-caller { color: var(--text); }
+.cg-symbol { color: var(--text-dim); text-align: center; font-size: 0.8rem; }
+.cg-callee { color: var(--accent-blue); }
+.cg-desc { font-size: 0.6rem; color: var(--text-dim); }
+
+/* ═══════════════════════════════════════════════
+   CAS D'USAGE
+═══════════════════════════════════════════════ */
+.uc-layout { display: grid; grid-template-columns: 220px 1fr; gap: 20px; }
+.uc-actors { display: flex; flex-direction: column; gap: 10px; }
+.uc-actor {
+  border: 1px solid var(--border2); border-radius: 8px;
+  background: var(--surface); padding: 14px;
+  text-align: center;
+}
+.uc-actor-icon { font-size: 2rem; margin-bottom: 6px; }
+.uc-actor-name { font-size: 0.8rem; font-weight: 700; margin-bottom: 4px; }
+.uc-actor-role { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; color: var(--text-dim); }
+
+.uc-system {
+  border: 2px solid var(--border2); border-radius: 10px;
+  background: var(--surface); padding: 18px;
+}
+.uc-system-title {
+  font-size: 0.65rem; font-family: 'JetBrains Mono', monospace;
+  color: var(--text-dim); letter-spacing: 2px; text-align: center;
+  border-bottom: 1px solid var(--border2); padding-bottom: 10px; margin-bottom: 14px;
+}
+.uc-groups { display: flex; flex-direction: column; gap: 12px; }
+.uc-group {
+  border: 1px solid var(--border2); border-radius: 6px; overflow: hidden;
+}
+.uc-group-header {
+  padding: 7px 12px; background: var(--surface2);
+  font-size: 0.7rem; font-weight: 700; color: var(--text-mid);
+  border-bottom: 1px solid var(--border2); display: flex; align-items: center; gap: 8px;
+}
+.uc-cases { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+.uc-case {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.67rem;
+  padding: 5px 12px; border-radius: 20px;
+  border: 1px solid var(--border2); background: var(--bg);
+  color: var(--text-mid); display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.uc-case.primary { border-color: #38bdf840; color: var(--electron); }
+.uc-case.secondary { border-color: #a78bfa40; color: var(--ipc); }
+.uc-case.system { border-color: #4ade8040; color: var(--db); }
+
+.uc-relations { margin-top: 20px; }
+.uc-rel {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.67rem;
+  padding: 5px 0; border-bottom: 1px solid var(--border); color: var(--text-mid);
+}
+.uc-rel-actor { color: var(--text); width: 80px; flex-shrink: 0; }
+.uc-rel-line { flex: 1; height: 1px; background: var(--border2); }
+.uc-rel-type { font-size: 0.58rem; color: var(--text-dim); white-space: nowrap; }
+.uc-rel-case { color: var(--accent-blue); }
+
+/* ═══════════════════════════════════════════════
+   GANTT
+═══════════════════════════════════════════════ */
+.gantt-wrap { overflow-x: auto; }
+.gantt {
+  min-width: 900px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.gantt-header {
+  display: grid;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 2px;
+}
+.gantt-header-left {
+  font-size: 0.6rem; color: var(--text-dim); padding: 6px 10px;
+  letter-spacing: 2px; text-transform: uppercase;
+}
+.gantt-header-dates {
+  display: flex; border-left: 1px solid var(--border2);
+}
+.gantt-month-label {
+  flex: 1; font-size: 0.6rem; color: var(--text-dim);
+  text-align: center; padding: 4px 0; border-right: 1px solid var(--border);
+}
+.gantt-row {
+  display: flex; align-items: center;
+  border-bottom: 1px solid var(--border);
+  min-height: 36px; position: relative;
+}
+.gantt-row:hover { background: var(--surface2); }
+.gantt-task-info {
+  width: 240px; flex-shrink: 0;
+  padding: 0 10px; display: flex; align-items: center; gap: 8px;
+  border-right: 1px solid var(--border2);
+}
+.gantt-task-num {
+  font-size: 0.58rem; color: var(--text-dim);
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 3px; padding: 1px 5px; flex-shrink: 0;
+}
+.gantt-task-name { font-size: 0.68rem; color: var(--text); }
+.gantt-timeline { flex: 1; position: relative; height: 36px; }
+.gantt-bar {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  height: 18px; border-radius: 4px;
+  display: flex; align-items: center; padding: 0 8px;
+  font-size: 0.58rem; font-weight: 600; white-space: nowrap; overflow: hidden;
+}
+.gantt-bar.done { background: #1a3a1a; border: 1px solid #4ade8060; color: var(--db); }
+.gantt-bar.progress { background: #1a2a3a; border: 1px solid #38bdf860; color: var(--electron); }
+.gantt-bar.pending { background: #2a2a1a; border: 1px solid #fbbf2440; color: var(--store); }
+.gantt-bar.overdue { background: #3a1a1a; border: 1px solid #f8717160; color: var(--flask); }
+
+.gantt-today {
+  position: absolute; top: 0; bottom: 0; width: 2px;
+  background: var(--flask); opacity: 0.7; z-index: 10;
+}
+.gantt-today::after {
+  content: 'Aujourd\'hui'; position: absolute; top: -18px; left: 4px;
+  font-size: 0.55rem; color: var(--flask); white-space: nowrap;
+}
+
+.gantt-legend { display: flex; gap: 16px; margin-top: 16px; }
+.gantt-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: var(--text-dim); }
+.gantt-legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-title">Annuaire Téléphonique — Documentation Architecture</div>
+    <div class="header-sub">// Samuel Soliman &amp; Théo De la Chapelle · Projet NSI 2026</div>
+  </div>
+  <div class="header-meta">
+    <span class="badge">UML 2.5</span>
+    <span class="badge">Electron 40</span>
+    <span class="badge">Flask 2.3</span>
+    <span class="badge">SQLite</span>
+  </div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="showTab('composants', this)">① Composants</div>
+  <div class="tab" onclick="showTab('classes', this)">② Classes &amp; Modèle</div>
+  <div class="tab" onclick="showTab('sequence', this)">③ Séquence</div>
+  <div class="tab" onclick="showTab('deploiement', this)">④ Déploiement</div>
+  <div class="tab" onclick="showTab('api', this)">⑤ Contrat API</div>
+  <div class="tab" onclick="showTab('code', this)">⑥ Diagramme Code</div>
+  <div class="tab" onclick="showTab('usage', this)">⑦ Cas d'Usage</div>
+  <div class="tab" onclick="showTab('gantt', this)">⑧ Gantt</div>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     ① DIAGRAMME DE COMPOSANTS
+══════════════════════════════════════════════ -->
+<section id="composants" class="active">
+  <div class="section-heading">Diagramme de Composants · Vue Système</div>
+
+  <div class="comp-grid">
+
+    <!-- Colonne gauche : Frontend Electron -->
+    <div class="comp-col">
+
+      <div class="comp-box role-electron">
+        <div class="comp-header">
+          <div class="comp-icon"></div>
+          <div class="comp-name">MainProcess</div>
+          <div class="comp-stereotype">«executable»</div>
+        </div>
+        <div class="comp-file">main.js</div>
+        <div class="comp-body">
+          <div class="comp-iface">
+            <div class="iface-label">Interfaces fournies</div>
+            <div class="iface-item provide">IPC: db-choice</div>
+            <div class="iface-item provide">IPC: forget-db-choice</div>
+            <div class="iface-item provide">invoke: ping-url</div>
+            <div class="iface-item provide">invoke: show-confirmation-dialog</div>
+          </div>
+          <div class="comp-iface">
+            <div class="iface-label">Interfaces requises</div>
+            <div class="iface-item require">electron-store: get / set / delete</div>
+            <div class="iface-item require">HTTP GET /api/health</div>
+            <div class="iface-item require">spawn: api_server(.py|.exe)</div>
+          </div>
+          <div class="comp-iface">
+            <div class="iface-label">Émets événements</div>
+            <div class="iface-item event">IPC send: db-url → renderer</div>
+          </div>
+          <ul class="dep-list">
+            <li>Crée choiceWindow puis mainWindow (BrowserWindow)</li>
+            <li>Spawn Python Flask en mode local, attend /api/health (30 retries × 500ms)</li>
+            <li>Relaunch app après forget-db-choice</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="comp-box role-ipc">
+        <div class="comp-header">
+          <div class="comp-icon"></div>
+          <div class="comp-name">PreloadBridge</div>
+          <div class="comp-stereotype">«bridge»</div>
+        </div>
+        <div class="comp-file">preload.js</div>
+        <div class="comp-body">
+          <div class="comp-iface">
+            <div class="iface-label">Expose via contextBridge</div>
+            <div class="iface-item provide">window.api.fetch(path, opts)</div>
+            <div class="iface-item provide">window.api.on(channel, cb)</div>
+            <div class="iface-item provide">window.api.forgetDbChoice()</div>
+            <div class="iface-item provide">window.ipc.send(ch, data)</div>
+            <div class="iface-item provide">window.ipc.ping(url) → bool</div>
+            <div class="iface-item provide">window.ipc.showConfirmationDialog(msg)</div>
+          </div>
+          <ul class="dep-list">
+            <li>Promise interne résout db-url avant tout fetch</li>
+            <li>Préfixe automatiquement l'URL de base à chaque requête</li>
+            <li>Lève une Error si la réponse HTTP n'est pas ok (res.erreur)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="comp-box role-electron">
+        <div class="comp-header">
+          <div class="comp-icon"></div>
+          <div class="comp-name">ChoiceRenderer</div>
+          <div class="comp-stereotype">«renderer»</div>
+        </div>
+        <div class="comp-file">choice.html · choice.js · choice.css</div>
+        <div class="comp-body">
+          <ul class="dep-list">
+            <li>Trois actions : Local DB / Théo's Server / Remote URL</li>
+            <li>Ping /api/health avant connexion distante</li>
+            <li>Valide préfixe http(s):// sur l'URL saisie</li>
+            <li>Envoie db-choice {type, url?, remember} au MainProcess</li>
+            <li>Messages d'erreur auto-effaçants (5 s)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="comp-box role-electron">
+        <div class="comp-header">
+          <div class="comp-icon"></div>
+          <div class="comp-name">MainRenderer</div>
+          <div class="comp-stereotype">«renderer»</div>
+        </div>
+        <div class="comp-file">index.html · index.js · style.css</div>
+        <div class="comp-body">
+          <ul class="dep-list">
+            <li>CRUD contacts via window.api.fetch</li>
+            <li>Validation locale email (regex) + tel (exactement 10 chiffres)</li>
+            <li>Mode édition : pré-remplissage formulaire + bouton Annuler</li>
+            <li>Confirmation suppression via ipc.showConfirmationDialog</li>
+            <li>Recherche live GET /api/contacts/search?q=</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="comp-box role-store">
+        <div class="comp-header">
+          <div class="comp-icon"></div>
+          <div class="comp-name">PreferenceStore</div>
+          <div class="comp-stereotype">«storage»</div>
+        </div>
+        <div class="comp-file">electron-store v5 · JSON chiffré OS</div>
+        <div class="comp-body">
+          <div class="comp-iface">
+            <div class="iface-label">Données persistées</div>
+            <div class="iface-item provide">dbChoice: {type, url?, remember}</div>
+          </div>
+          <ul class="dep-list">
+            <li>Relecture à chaque démarrage → bypass choiceWindow</li>
+            <li>Suppression sur forget-db-choice</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Colonne centre : connexions -->
+    <div class="conn-col">
+      <div class="conn-block">
+        <div class="conn-line" style="height:60px"></div>
+        <div class="conn-diamond"></div>
+        <div class="conn-label">IPC<br>Electron</div>
+        <div class="conn-diamond"></div>
+        <div class="conn-line" style="height:40px"></div>
+        <div class="conn-arrow">⇕</div>
+        <div class="conn-line" style="height:20px"></div>
+        <div class="conn-label">context<br>Bridge</div>
+        <div class="conn-line" style="height:20px"></div>
+        <div class="conn-arrow">⇕</div>
+        <div class="conn-line" style="height:40px"></div>
+        <div class="conn-label">HTTP<br>REST</div>
+        <div class="conn-line" style="height:20px"></div>
+        <div class="conn-arrow">⇕</div>
+        <div class="conn-line" style="height:30px"></div>
+        <div class="conn-label">ORM<br>SQLAlchemy</div>
+        <div class="conn-line" style="height:20px"></div>
+        <div class="conn-arrow">⇕</div>
+        <div class="conn-line" style="height:80px"></div>
+      </div>
+    </div>
+
+    <!-- Colonne droite : Backend -->
+    <div class="comp-col">
+
+      <div class="comp-box role-flask">
+        <div class="comp-header">
+          <div class="comp-icon"></div>
+          <div class="comp-name">FlaskAPIServer</div>
+          <div class="comp-stereotype">«service»</div>
+        </div>
+        <div class="comp-file">api_server.py · 0.0.0.0:5001</div>
+        <div class="comp-body">
+          <div class="comp-iface">
+            <div class="iface-label">Interfaces fournies (REST)</div>
+            <div class="iface-item provide">GET  /api/contacts</div>
+            <div class="iface-item provide">GET  /api/contacts/:id</div>
+            <div class="iface-item provide">POST /api/contacts</div>
+            <div class="iface-item provide">PUT  /api/contacts/:id</div>
+            <div class="iface-item provide">DELETE /api/contacts/:id</div>
+            <div class="iface-item provide">GET  /api/contacts/search?q=</div>
+            <div class="iface-item provide">GET  /api/stats</div>
+            <div class="iface-item provide">GET  /api/health</div>
+          </div>
+          <div class="comp-iface">
+            <div class="iface-label">Interfaces requises</div>
+            <div class="iface-item require">SQLAlchemy ORM → DB</div>
+          </div>
+          <ul class="dep-list">
+            <li>CORS wildcard sur /api/*</li>
+            <li>CLI arg --db-uri | env DATABASE_URL | SQLite par défaut</li>
+            <li>Validation email (regex RFC simplifié)</li>
+            <li>Validation téléphone (re.sub digits, len == 10)</li>
+            <li>Build PyInstaller → binaire autonome (api_server.exe)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="comp-box role-flask" style="border-color:#f8717160">
+        <div class="comp-header">
+          <div class="comp-icon"></div>
+          <div class="comp-name">AnnuaireManager</div>
+          <div class="comp-stereotype">«service layer»</div>
+        </div>
+        <div class="comp-file">api_server.py (class AnnuaireManager)</div>
+        <div class="comp-body">
+          <ul class="dep-list">
+            <li>ajouter_contact() — INSERT + commit</li>
+            <li>obtenir_tous_les_contacts() — SELECT *</li>
+            <li>obtenir_contact_par_id(id) — session.get()</li>
+            <li>rechercher_contacts(terme) — ilike % %</li>
+            <li>modifier_contact(id, **kwargs) — UPDATE champs autorisés</li>
+            <li>supprimer_contact(id) — DELETE + commit</li>
+            <li>obtenir_stats() — COUNT(*)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="comp-box role-db">
+        <div class="comp-header">
+          <div class="comp-icon"></div>
+          <div class="comp-name">ContactDB</div>
+          <div class="comp-stereotype">«database»</div>
+        </div>
+        <div class="comp-file">contacts.db · SQLite 3</div>
+        <div class="comp-body">
+          <div class="comp-iface">
+            <div class="iface-label">Table : contact</div>
+            <div class="iface-item provide">PK id INTEGER</div>
+            <div class="iface-item provide">nom, prenom VARCHAR(80)</div>
+            <div class="iface-item provide">email VARCHAR(120) UNIQUE</div>
+            <div class="iface-item provide">telephone VARCHAR(20)</div>
+            <div class="iface-item provide">adresse, adresse_travail VARCHAR(200)</div>
+            <div class="iface-item provide">date_creation, date_modification DATETIME</div>
+          </div>
+          <ul class="dep-list">
+            <li>URI configurable → SQLite local (userData) ou PostgreSQL distant</li>
+            <li>db.create_all() au démarrage du serveur</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     ② DIAGRAMME DE CLASSES
+══════════════════════════════════════════════ -->
+<section id="classes">
+  <div class="section-heading">Diagramme de Classes · Modèle Domaine</div>
+
+  <div class="class-grid">
+
+    <!-- Contact (SQLAlchemy Model) -->
+    <div class="class-box" style="border-color:#4ade8060">
+      <div class="class-title-bar" style="background:#0a1f10">
+        <div class="class-stereotype">«entity» SQLAlchemy Model</div>
+        <div class="class-name" style="color:#4ade80">Contact</div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">Attributs</div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">id</span><span class="type">: Integer [PK]</span></div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">nom</span><span class="type">: String(80)</span></div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">prenom</span><span class="type">: String(80)</span></div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">email</span><span class="type">: String(120) [UNIQUE]</span></div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">telephone</span><span class="type">: String(20)</span></div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">adresse</span><span class="type">: String(200)</span></div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">adresse_travail</span><span class="type">: String(200)</span></div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">date_creation</span><span class="type">: DateTime</span></div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">date_modification</span><span class="type">: DateTime</span></div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">Méthodes</div>
+        <div class="class-method"><span class="vis">+</span><span class="name">to_dict()</span><span class="ret">: Dict</span></div>
+      </div>
+    </div>
+
+    <!-- AnnuaireManager -->
+    <div class="class-box" style="border-color:#f8717160">
+      <div class="class-title-bar" style="background:#1a0a0a">
+        <div class="class-stereotype">«service» Business Layer</div>
+        <div class="class-name" style="color:#f87171">AnnuaireManager</div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">Attributs</div>
+        <div class="class-attr"><span class="vis">—</span><span class="name">(aucun état local)</span><span class="type"></span></div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">Méthodes</div>
+        <div class="class-method"><span class="vis">+</span><span class="name">ajouter_contact(nom, prenom, email, tel, adresse, adresse_travail)</span><span class="ret">: Dict</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">obtenir_tous_les_contacts()</span><span class="ret">: List[Dict]</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">obtenir_contact_par_id(id)</span><span class="ret">: Dict?</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">rechercher_contacts(terme)</span><span class="ret">: List[Dict]</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">modifier_contact(id, **kwargs)</span><span class="ret">: Dict?</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">supprimer_contact(id)</span><span class="ret">: bool</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">obtenir_stats()</span><span class="ret">: Dict</span></div>
+      </div>
+    </div>
+
+    <!-- FlaskApp -->
+    <div class="class-box" style="border-color:#38bdf860">
+      <div class="class-title-bar" style="background:#0a1525">
+        <div class="class-stereotype">«controller» Flask Routes</div>
+        <div class="class-name" style="color:#38bdf8">FlaskAPIServer</div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">Config</div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">SQLALCHEMY_DATABASE_URI</span><span class="type">: str</span></div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">CORS origins</span><span class="type">: "*"</span></div>
+        <div class="class-attr"><span class="vis">+</span><span class="name">port</span><span class="type">: 5001</span></div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">Routes (handlers)</div>
+        <div class="class-method"><span class="vis">+</span><span class="name">get_all_contacts()</span><span class="ret">→ 200</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">get_contact(id)</span><span class="ret">→ 200|404</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">create_contact()</span><span class="ret">→ 201|400</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">update_contact(id)</span><span class="ret">→ 200|400|404</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">delete_contact(id)</span><span class="ret">→ 200|404</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">search_contacts()</span><span class="ret">→ 200|400</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">get_stats()</span><span class="ret">→ 200</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">health_check()</span><span class="ret">→ 200|500</span></div>
+      </div>
+    </div>
+
+    <!-- Validation -->
+    <div class="class-box" style="border-color:#a78bfa60">
+      <div class="class-title-bar" style="background:#160d2a">
+        <div class="class-stereotype">«utility» Validation</div>
+        <div class="class-name" style="color:#a78bfa">ValidationHelper</div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">Fonctions (module-level)</div>
+        <div class="class-method"><span class="vis">+</span><span class="name">validate_email(email)</span><span class="ret">: Tuple[bool, str]</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">validate_telephone(tel)</span><span class="ret">: Tuple[bool, str]</span></div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">Règles</div>
+        <div class="class-attr"><span class="vis">·</span><span class="name">email</span><span class="type">regex /^[^\s@]+@[^\s@]+\.[^\s@]+$/</span></div>
+        <div class="class-attr"><span class="vis">·</span><span class="name">tel</span><span class="type">re.sub(\D,'') → len == 10</span></div>
+      </div>
+    </div>
+
+    <!-- MainProcess -->
+    <div class="class-box" style="border-color:#38bdf860">
+      <div class="class-title-bar" style="background:#0a1525">
+        <div class="class-stereotype">«module» Electron Main</div>
+        <div class="class-name" style="color:#38bdf8">MainProcess</div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">État global</div>
+        <div class="class-attr"><span class="vis">–</span><span class="name">pythonProcess</span><span class="type">: ChildProcess?</span></div>
+        <div class="class-attr"><span class="vis">–</span><span class="name">mainWindow</span><span class="type">: BrowserWindow?</span></div>
+        <div class="class-attr"><span class="vis">–</span><span class="name">choiceWindow</span><span class="type">: BrowserWindow?</span></div>
+        <div class="class-attr"><span class="vis">–</span><span class="name">store</span><span class="type">: Store</span></div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">Fonctions</div>
+        <div class="class-method"><span class="vis">–</span><span class="name">createChoiceWindow()</span><span class="ret">: void</span></div>
+        <div class="class-method"><span class="vis">–</span><span class="name">createWindow()</span><span class="ret">: void</span></div>
+        <div class="class-method"><span class="vis">–</span><span class="name">waitForServer(url, retries)</span><span class="ret">: Promise&lt;bool&gt;</span></div>
+        <div class="class-method"><span class="vis">–</span><span class="name">handleDbChoice(choice)</span><span class="ret">: Promise&lt;void&gt;</span></div>
+      </div>
+    </div>
+
+    <!-- PreloadBridge -->
+    <div class="class-box" style="border-color:#a78bfa60">
+      <div class="class-title-bar" style="background:#160d2a">
+        <div class="class-stereotype">«bridge» contextBridge</div>
+        <div class="class-name" style="color:#a78bfa">PreloadBridge</div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">State</div>
+        <div class="class-attr"><span class="vis">–</span><span class="name">dbUrlPromise</span><span class="type">: Promise&lt;string&gt;</span></div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">API exposée (window.api)</div>
+        <div class="class-method"><span class="vis">+</span><span class="name">fetch(path, opts)</span><span class="ret">: Promise&lt;any&gt;</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">on(channel, cb)</span><span class="ret">: void</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">forgetDbChoice()</span><span class="ret">: void</span></div>
+      </div>
+      <div class="class-section">
+        <div class="class-section-label">API exposée (window.ipc)</div>
+        <div class="class-method"><span class="vis">+</span><span class="name">send(channel, data)</span><span class="ret">: void</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">ping(url)</span><span class="ret">: Promise&lt;bool&gt;</span></div>
+        <div class="class-method"><span class="vis">+</span><span class="name">showConfirmationDialog(msg)</span><span class="ret">: Promise&lt;bool&gt;</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Relations -->
+  <div class="class-relations" style="margin-top:28px">
+    <div class="section-heading">Relations entre classes</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Source</th><th>Relation</th><th>Cible</th><th>Multiplicité</th><th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>FlaskAPIServer</td>
+          <td>«uses»</td>
+          <td>AnnuaireManager</td>
+          <td>1 → 1</td>
+          <td>Instance globale <code>annuaire</code> utilisée par tous les handlers</td>
+        </tr>
+        <tr>
+          <td>AnnuaireManager</td>
+          <td>«manages»</td>
+          <td>Contact</td>
+          <td>1 → *</td>
+          <td>CRUD via SQLAlchemy session</td>
+        </tr>
+        <tr>
+          <td>FlaskAPIServer</td>
+          <td>«uses»</td>
+          <td>ValidationHelper</td>
+          <td>1 → 1</td>
+          <td>Appelé dans create_contact et update_contact</td>
+        </tr>
+        <tr>
+          <td>MainProcess</td>
+          <td>«spawns»</td>
+          <td>FlaskAPIServer</td>
+          <td>1 → 0..1</td>
+          <td>Processus enfant Python en mode local</td>
+        </tr>
+        <tr>
+          <td>MainProcess</td>
+          <td>«creates»</td>
+          <td>PreloadBridge</td>
+          <td>1 → 1</td>
+          <td>Via webPreferences.preload de BrowserWindow</td>
+        </tr>
+        <tr>
+          <td>PreloadBridge</td>
+          <td>«calls»</td>
+          <td>FlaskAPIServer</td>
+          <td>* → 1</td>
+          <td>HTTP REST fetch préfixé par db-url</td>
+        </tr>
+        <tr>
+          <td>MainProcess</td>
+          <td>«reads/writes»</td>
+          <td>PreferenceStore</td>
+          <td>1 → 1</td>
+          <td>Persistance de dbChoice via electron-store</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     ③ DIAGRAMME DE SÉQUENCE
+══════════════════════════════════════════════ -->
+<section id="sequence">
+  <div class="section-heading">Diagrammes de Séquence</div>
+
+  <!-- Scénario 1 : Démarrage local -->
+  <div style="margin-bottom:10px; font-size:0.78rem; color:var(--text-mid);">
+    <strong style="color:var(--accent-blue)">SC-01</strong> · Démarrage en mode base de données locale
+  </div>
+
+  <div class="seq-wrapper">
+    <div class="seq-diagram">
+      <!-- Participants -->
+      <div class="seq-participants">
+        <div class="seq-part"><div class="seq-part-box" style="color:var(--electron);border-color:#38bdf840">:Electron<br>App</div></div>
+        <div class="seq-part"><div class="seq-part-box" style="color:var(--electron);border-color:#38bdf840">:MainProcess</div></div>
+        <div class="seq-part"><div class="seq-part-box" style="color:var(--ipc);border-color:#a78bfa40">:ChoiceWindow<br>Renderer</div></div>
+        <div class="seq-part"><div class="seq-part-box" style="color:var(--flask);border-color:#f8717140">:FlaskAPIServer</div></div>
+        <div class="seq-part"><div class="seq-part-box" style="color:var(--electron);border-color:#38bdf840">:MainWindow<br>Renderer</div></div>
+      </div>
+
+      <!-- Messages -->
+      <div style="padding:0">
+        <div class="msg-row">
+          <div class="msg-time">t0</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--electron)">App</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#38bdf8;flex:0.3"></div>
+              <span class="msg-label">whenReady() — store.get('dbChoice') → null</span>
+              <div class="msg-line" style="background:#38bdf8;flex:0.7"></div>
+              <span class="msg-head" style="color:#38bdf8">▶</span>
+            </div>
+            <span class="msg-to">MainProcess</span>
+            <span class="msg-note">Pas de choix mémorisé</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t1</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--electron)">MainProcess</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#a78bfa;flex:0.5"></div>
+              <span class="msg-label">createChoiceWindow()</span>
+              <div class="msg-line" style="background:#a78bfa;flex:0.5"></div>
+              <span class="msg-head" style="color:#a78bfa">▶</span>
+            </div>
+            <span class="msg-to">ChoiceWindow</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t2</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--ipc)">ChoiceWindow</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#a78bfa;flex:0.4"></div>
+              <span class="msg-label">IPC: db-choice {type:'local', remember:true}</span>
+              <div class="msg-line" style="background:#a78bfa;flex:0.6"></div>
+              <span class="msg-head" style="color:#a78bfa">▶</span>
+            </div>
+            <span class="msg-to">MainProcess</span>
+            <span class="msg-note">User clique « Local »</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t3</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--electron)">MainProcess</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#f87171;flex:0.6"></div>
+              <span class="msg-label">spawn('python', ['api_server.py', '--db-uri', sqlite:///…])</span>
+              <div class="msg-line" style="background:#f87171;flex:0.4"></div>
+              <span class="msg-head" style="color:#f87171">▶</span>
+            </div>
+            <span class="msg-to">FlaskAPI</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t4</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--electron)">MainProcess</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#f87171;flex:0.6"></div>
+              <span class="msg-label">GET /api/health (×n jusqu'à 200 OK, 500ms interval)</span>
+              <div class="msg-line" style="background:#f87171;flex:0.4"></div>
+              <span class="msg-head" style="color:#f87171">▶</span>
+            </div>
+            <span class="msg-to">FlaskAPI</span>
+            <span class="msg-note">waitForServer()</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t5</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--flask)">FlaskAPI</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#4ade80;flex:0.6"></div>
+              <span class="msg-label">200 OK {status:'ok', database:'connected'}</span>
+              <div class="msg-line" style="background:#4ade80;flex:0.4"></div>
+              <span class="msg-head" style="color:#4ade80">◀</span>
+            </div>
+            <span class="msg-to">MainProcess</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t6</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--electron)">MainProcess</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#38bdf8;flex:0.7"></div>
+              <span class="msg-label">createWindow() + webContents.send('db-url', apiBaseUrl)</span>
+              <div class="msg-line" style="background:#38bdf8;flex:0.3"></div>
+              <span class="msg-head" style="color:#38bdf8">▶</span>
+            </div>
+            <span class="msg-to">MainWindow</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t7</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--electron)">MainWindow</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#f87171;flex:0.7"></div>
+              <span class="msg-label">GET /api/contacts</span>
+              <div class="msg-line" style="background:#f87171;flex:0.3"></div>
+              <span class="msg-head" style="color:#f87171">▶</span>
+            </div>
+            <span class="msg-to">FlaskAPI</span>
+            <span class="msg-note">loadContacts()</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scénario 2 : Ajout contact -->
+  <div style="margin:32px 0 10px; font-size:0.78rem; color:var(--text-mid);">
+    <strong style="color:var(--accent-green)">SC-02</strong> · Création d'un contact (happy path)
+  </div>
+
+  <div class="seq-wrapper">
+    <div class="seq-diagram">
+      <div class="seq-participants">
+        <div class="seq-part"><div class="seq-part-box" style="color:var(--ipc);border-color:#a78bfa40">:MainRenderer<br>(index.js)</div></div>
+        <div class="seq-part"><div class="seq-part-box" style="color:var(--ipc);border-color:#a78bfa40">:PreloadBridge<br>(preload.js)</div></div>
+        <div class="seq-part"><div class="seq-part-box" style="color:var(--flask);border-color:#f8717140">:FlaskAPIServer<br>(api_server.py)</div></div>
+        <div class="seq-part"><div class="seq-part-box" style="color:var(--db);border-color:#4ade8040">:AnnuaireManager</div></div>
+        <div class="seq-part"><div class="seq-part-box" style="color:var(--db);border-color:#4ade8040">:SQLite DB</div></div>
+      </div>
+
+      <div>
+        <div class="msg-row">
+          <div class="msg-time">t0</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--ipc)">Renderer</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#a78bfa;flex:0.5"></div>
+              <span class="msg-label">validateContact() → ok</span>
+              <div class="msg-line" style="background:#a78bfa;flex:0.5"></div>
+              <span class="msg-head" style="color:#a78bfa">▶</span>
+            </div>
+            <span class="msg-to" style="color:var(--ipc)">Renderer</span>
+            <span class="msg-note">Validation locale</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t1</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--ipc)">Renderer</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#a78bfa;flex:0.5"></div>
+              <span class="msg-label">api.fetch('/api/contacts', {method:'POST', body:JSON})</span>
+              <div class="msg-line" style="background:#a78bfa;flex:0.5"></div>
+              <span class="msg-head" style="color:#a78bfa">▶</span>
+            </div>
+            <span class="msg-to">PreloadBridge</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t2</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--ipc)">PreloadBridge</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#f87171;flex:0.5"></div>
+              <span class="msg-label">POST http://127.0.0.1:5001/api/contacts</span>
+              <div class="msg-line" style="background:#f87171;flex:0.5"></div>
+              <span class="msg-head" style="color:#f87171">▶</span>
+            </div>
+            <span class="msg-to">FlaskAPI</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t3</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--flask)">FlaskAPI</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#f87171;flex:0.5"></div>
+              <span class="msg-label">validate_email() + validate_telephone() → ok</span>
+              <div class="msg-line" style="background:#f87171;flex:0.5"></div>
+              <span class="msg-head" style="color:#f87171">▶</span>
+            </div>
+            <span class="msg-to" style="color:var(--flask)">FlaskAPI</span>
+            <span class="msg-note">Validation serveur</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t4</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--flask)">FlaskAPI</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#4ade80;flex:0.5"></div>
+              <span class="msg-label">annuaire.ajouter_contact(…)</span>
+              <div class="msg-line" style="background:#4ade80;flex:0.5"></div>
+              <span class="msg-head" style="color:#4ade80">▶</span>
+            </div>
+            <span class="msg-to" style="color:var(--db)">AnnuaireManager</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t5</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--db)">Manager</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#4ade80;flex:0.5"></div>
+              <span class="msg-label">db.session.add(contact); db.session.commit()</span>
+              <div class="msg-line" style="background:#4ade80;flex:0.5"></div>
+              <span class="msg-head" style="color:#4ade80">▶</span>
+            </div>
+            <span class="msg-to" style="color:var(--db)">SQLite</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t6</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--db)">Manager</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#4ade80;flex:0.5"></div>
+              <span class="msg-label">contact.to_dict() → {id, nom, …}</span>
+              <div class="msg-line" style="background:#4ade80;flex:0.5"></div>
+              <span class="msg-head" style="color:#4ade80">◀</span>
+            </div>
+            <span class="msg-to" style="color:var(--flask)">FlaskAPI</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t7</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--flask)">FlaskAPI</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#60a5fa;flex:0.5"></div>
+              <span class="msg-label">201 Created {contact_dict}</span>
+              <div class="msg-line" style="background:#60a5fa;flex:0.5"></div>
+              <span class="msg-head" style="color:#60a5fa">◀</span>
+            </div>
+            <span class="msg-to">PreloadBridge</span>
+          </div>
+        </div>
+        <div class="msg-row">
+          <div class="msg-time">t8</div>
+          <div class="msg-body">
+            <span class="msg-from" style="color:var(--ipc)">PreloadBridge</span>
+            <div class="msg-arrow-line">
+              <div class="msg-line" style="background:#a78bfa;flex:0.5"></div>
+              <span class="msg-label">resolve(data) → loadContacts()</span>
+              <div class="msg-line" style="background:#a78bfa;flex:0.5"></div>
+              <span class="msg-head" style="color:#a78bfa">◀</span>
+            </div>
+            <span class="msg-to" style="color:var(--ipc)">Renderer</span>
+            <span class="msg-note">Affiche succès</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     ④ DÉPLOIEMENT
+══════════════════════════════════════════════ -->
+<section id="deploiement">
+  <div class="section-heading">Diagramme de Déploiement · Nœuds d'exécution</div>
+
+  <div class="deploy-grid">
+
+    <div class="deploy-node">
+      <div class="deploy-node-header">
+        <span class="deploy-node-icon">💻</span>
+        <span class="deploy-node-name" style="color:var(--electron)">Machine Utilisateur</span>
+        <span class="deploy-node-type">«device» Windows / macOS / Linux</span>
+      </div>
+      <div class="deploy-node-body">
+
+        <div class="deploy-artifact">
+          <div class="deploy-artifact-name" style="color:var(--electron)">Electron Application</div>
+          <div class="deploy-artifact-type">«executable» Annuaire Téléphonique.exe</div>
+          <div class="deploy-artifact-deps">
+            <span class="dep-badge electron-dep">main.js</span>
+            <span class="dep-badge electron-dep">preload.js</span>
+            <span class="dep-badge electron-dep">index.html</span>
+            <span class="dep-badge electron-dep">choice.html</span>
+            <span class="dep-badge electron-dep">index.js</span>
+            <span class="dep-badge electron-dep">choice.js</span>
+            <span class="dep-badge electron-dep">style.css</span>
+            <span class="dep-badge electron-dep">choice.css</span>
+            <span class="dep-badge">electron-store</span>
+            <span class="dep-badge">node_modules</span>
+          </div>
+        </div>
+
+        <div class="deploy-artifact" style="border-color:#f8717140">
+          <div class="deploy-artifact-name" style="color:var(--flask)">Flask API Server</div>
+          <div class="deploy-artifact-type">«executable» api_server.exe (PyInstaller)</div>
+          <div class="deploy-artifact-deps">
+            <span class="dep-badge flask-dep">api_server.py</span>
+            <span class="dep-badge flask-dep">Flask 2.3</span>
+            <span class="dep-badge flask-dep">Flask-CORS</span>
+            <span class="dep-badge flask-dep">Flask-SQLAlchemy</span>
+            <span class="dep-badge">Python 3.x runtime</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--text-dim);margin-top:6px">
+            Processus enfant · port 5001 · spawn par MainProcess
+          </div>
+        </div>
+
+        <div class="deploy-artifact" style="border-color:#4ade8040">
+          <div class="deploy-artifact-name" style="color:var(--db)">SQLite Database</div>
+          <div class="deploy-artifact-type">«database» contacts.db</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--text-dim);margin-top:4px">
+            Chemin : app.getPath('userData')/contacts.db<br>
+            ex: %APPDATA%/Annuaire Téléphonique/contacts.db
+          </div>
+        </div>
+
+        <div class="deploy-artifact" style="border-color:#fbbf2440">
+          <div class="deploy-artifact-name" style="color:var(--store)">Preference Store</div>
+          <div class="deploy-artifact-type">«file» electron-store JSON</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--text-dim);margin-top:4px">
+            Chemin OS-dépendant : userData/config.json<br>
+            Clé : dbChoice {type, url?, remember}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="deploy-node">
+      <div class="deploy-node-header">
+        <span class="deploy-node-icon">🌐</span>
+        <span class="deploy-node-name" style="color:var(--accent-cyan)">Serveur Distant (optionnel)</span>
+        <span class="deploy-node-type">«server» dlchost.com · Linux</span>
+      </div>
+      <div class="deploy-node-body">
+
+        <div class="deploy-artifact" style="border-color:#22d3ee40">
+          <div class="deploy-artifact-name" style="color:var(--accent-cyan)">Remote Flask API</div>
+          <div class="deploy-artifact-type">«service» https://annuaire.dlchost.com</div>
+          <div class="deploy-artifact-deps">
+            <span class="dep-badge flask-dep">api_server.py</span>
+            <span class="dep-badge flask-dep">Flask</span>
+            <span class="dep-badge db-dep">PostgreSQL / SQLite</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--text-dim);margin-top:6px">
+            Même API Flask — DB URI via env DATABASE_URL<br>
+            Accessible via HTTP REST (HTTPS)
+          </div>
+        </div>
+
+        <div style="margin-top:12px;padding:10px 12px;border:1px dashed var(--border2);border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--text-dim)">
+          <div style="margin-bottom:4px;color:var(--text-mid)">Conditions de sélection du nœud :</div>
+          <div>① User choisit « Théo's Server » ou « Remote URL »</div>
+          <div>② Ping /api/health réussit (timeout 5s)</div>
+          <div>③ MainProcess envoie db-url = URL distante</div>
+          <div>④ Aucun processus Python spawné localement</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="deploy-comm" style="max-width:700px;margin-top:28px;border-top:1px solid var(--border2);padding-top:16px">
+    <div class="deploy-comm-title" style="margin-bottom:10px">CANAUX DE COMMUNICATION</div>
+    <div class="comm-line"><span class="comm-proto proto-ipc">IPC</span>Electron Main ⟷ Renderer (contextBridge / ipcMain / ipcRenderer)</div>
+    <div class="comm-line"><span class="comm-proto proto-http">HTTP</span>PreloadBridge ⟷ FlaskAPIServer — localhost:5001 ou URL distante</div>
+    <div class="comm-line"><span class="comm-proto proto-sql">ORM</span>FlaskAPIServer ⟷ SQLite — SQLAlchemy session (in-process)</div>
+    <div class="comm-line"><span class="comm-proto" style="background:#1a2a2a;color:var(--accent-cyan)">HTTPS</span>Electron (net.request) ⟷ Serveur distant — ping health check</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     ⑤ CONTRAT API
+══════════════════════════════════════════════ -->
+<section id="api">
+  <div class="section-heading">Contrat d'Interface REST · OpenAPI-like</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Méthode</th>
+        <th>Endpoint</th>
+        <th>Corps de requête</th>
+        <th>Réponse succès</th>
+        <th>Erreurs</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="method-badge GET">GET</span></td>
+        <td>/api/contacts</td>
+        <td>—</td>
+        <td>200 · Contact[]</td>
+        <td>500</td>
+        <td>Retourne tous les contacts</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge GET">GET</span></td>
+        <td>/api/contacts/:id</td>
+        <td>—</td>
+        <td>200 · Contact</td>
+        <td>404</td>
+        <td>Contact par identifiant</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge POST">POST</span></td>
+        <td>/api/contacts</td>
+        <td>nom, prenom, email, telephone, adresse, adresse_travail (tous requis)</td>
+        <td>201 · Contact</td>
+        <td>400 (champ manquant, email invalide, tel invalide)</td>
+        <td>Création d'un contact</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge PUT">PUT</span></td>
+        <td>/api/contacts/:id</td>
+        <td>Champs optionnels parmi les 6</td>
+        <td>200 · Contact</td>
+        <td>400, 404</td>
+        <td>Mise à jour partielle</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge DELETE">DELETE</span></td>
+        <td>/api/contacts/:id</td>
+        <td>—</td>
+        <td>200 · {message}</td>
+        <td>404</td>
+        <td>Suppression définitive</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge GET">GET</span></td>
+        <td>/api/contacts/search</td>
+        <td>?q=terme (query string)</td>
+        <td>200 · Contact[]</td>
+        <td>400 (q absent)</td>
+        <td>Recherche ilike sur nom, prenom, email</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge GET">GET</span></td>
+        <td>/api/stats</td>
+        <td>—</td>
+        <td>200 · {total_contacts, date_consultation}</td>
+        <td>—</td>
+        <td>Statistiques de l'annuaire</td>
+      </tr>
+      <tr>
+        <td><span class="method-badge GET">GET</span></td>
+        <td>/api/health</td>
+        <td>—</td>
+        <td>200 · {status:'ok', database:'connected'}</td>
+        <td>500</td>
+        <td>Healthcheck — utilisé par waitForServer()</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:28px">
+    <div class="section-heading">Schéma Contact (réponse JSON)</div>
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:18px 22px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-mid);line-height:2">
+      <span style="color:var(--text-dim)">{</span><br>
+      &nbsp;&nbsp;<span style="color:var(--accent-blue)">"id"</span><span style="color:var(--text-dim)">:</span> <span style="color:var(--accent-amber)">Integer</span><span style="color:var(--text-dim)"> // PK auto-incrémentée</span><br>
+      &nbsp;&nbsp;<span style="color:var(--accent-blue)">"nom"</span><span style="color:var(--text-dim)">:</span> <span style="color:var(--accent-green)">"String"</span><span style="color:var(--text-dim)"> // max 80 chars, strip()</span><br>
+      &nbsp;&nbsp;<span style="color:var(--accent-blue)">"prenom"</span><span style="color:var(--text-dim)">:</span> <span style="color:var(--accent-green)">"String"</span><br>
+      &nbsp;&nbsp;<span style="color:var(--accent-blue)">"email"</span><span style="color:var(--text-dim)">:</span> <span style="color:var(--accent-green)">"String"</span><span style="color:var(--text-dim)"> // UNIQUE, regex validé</span><br>
+      &nbsp;&nbsp;<span style="color:var(--accent-blue)">"telephone"</span><span style="color:var(--text-dim)">:</span> <span style="color:var(--accent-green)">"String"</span><span style="color:var(--text-dim)"> // exactement 10 chiffres</span><br>
+      &nbsp;&nbsp;<span style="color:var(--accent-blue)">"adresse"</span><span style="color:var(--text-dim)">:</span> <span style="color:var(--accent-green)">"String"</span><span style="color:var(--text-dim)"> // max 200 chars</span><br>
+      &nbsp;&nbsp;<span style="color:var(--accent-blue)">"adresse_travail"</span><span style="color:var(--text-dim)">:</span> <span style="color:var(--accent-green)">"String"</span><br>
+      &nbsp;&nbsp;<span style="color:var(--accent-blue)">"date_creation"</span><span style="color:var(--text-dim)">:</span> <span style="color:var(--accent-green)">"ISO 8601"</span><span style="color:var(--text-dim)"> // UTC, auto</span><br>
+      &nbsp;&nbsp;<span style="color:var(--accent-blue)">"date_modification"</span><span style="color:var(--text-dim)">:</span> <span style="color:var(--accent-green)">"ISO 8601 | null"</span><br>
+      <span style="color:var(--text-dim)">}</span>
+    </div>
+  </div>
+
+  <div style="margin-top:24px">
+    <div class="section-heading">Règles de validation (double couche)</div>
+    <table>
+      <thead>
+        <tr><th>Champ</th><th>Couche Client (index.js)</th><th>Couche Serveur (api_server.py)</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>email</td>
+          <td>includes('@') + regex /^[^\s@]+@[^\s@]+\.[^\s@]+$/</td>
+          <td>validate_email() : même regex + strip()</td>
+        </tr>
+        <tr>
+          <td>telephone</td>
+          <td>replace(/\D/,'').length === 10</td>
+          <td>validate_telephone() : re.sub(\D,'') len == 10</td>
+        </tr>
+        <tr>
+          <td>Champs vides</td>
+          <td>HTML required + JS guard avant soumission</td>
+          <td>Vérifie champ not in data or not data[champ] → 400</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     ⑥ DIAGRAMME DU CODE
+══════════════════════════════════════════════ -->
+<section id="code">
+  <div class="section-heading">Diagramme du Code Source · Structure &amp; Graphe d'Appels</div>
+
+  <div class="code-layout">
+
+    <!-- Arbre de fichiers -->
+    <div class="file-tree">
+      <div class="file-tree-header">📁 annuaire-telephonique/</div>
+      <div class="tree-node folder"><span class="tree-icon">📁</span><span class="tree-name">src/</span></div>
+      <div class="tree-node indent1"><span class="tree-icon">📄</span><span class="tree-name">main.js</span><span class="tree-badge" style="color:var(--electron)">Main</span></div>
+      <div class="tree-node indent1"><span class="tree-icon">📄</span><span class="tree-name">preload.js</span><span class="tree-badge" style="color:var(--ipc)">Bridge</span></div>
+      <div class="tree-node indent1 folder"><span class="tree-icon">📁</span><span class="tree-name">renderer/</span></div>
+      <div class="tree-node indent2"><span class="tree-icon">📄</span><span class="tree-name">index.html</span></div>
+      <div class="tree-node indent2"><span class="tree-icon">📄</span><span class="tree-name">index.js</span><span class="tree-badge" style="color:var(--electron)">Renderer</span></div>
+      <div class="tree-node indent2"><span class="tree-icon">📄</span><span class="tree-name">style.css</span></div>
+      <div class="tree-node indent2"><span class="tree-icon">📄</span><span class="tree-name">choice.html</span></div>
+      <div class="tree-node indent2"><span class="tree-icon">📄</span><span class="tree-name">choice.js</span><span class="tree-badge" style="color:var(--electron)">Renderer</span></div>
+      <div class="tree-node indent2"><span class="tree-icon">📄</span><span class="tree-name">choice.css</span></div>
+      <div class="tree-node folder"><span class="tree-icon">📁</span><span class="tree-name">backend/</span></div>
+      <div class="tree-node indent1"><span class="tree-icon">🐍</span><span class="tree-name">api_server.py</span><span class="tree-badge" style="color:var(--flask)">Flask</span></div>
+      <div class="tree-node indent1"><span class="tree-icon">📄</span><span class="tree-name">requirements.txt</span></div>
+      <div class="tree-node folder"><span class="tree-icon">📁</span><span class="tree-name">build/</span></div>
+      <div class="tree-node indent1"><span class="tree-icon">⚙️</span><span class="tree-name">api_server.spec</span><span class="tree-badge">PyInstaller</span></div>
+      <div class="tree-node indent1"><span class="tree-icon">💾</span><span class="tree-name">api_server.exe</span><span class="tree-badge">Binaire</span></div>
+      <div class="tree-node"><span class="tree-icon">📄</span><span class="tree-name">package.json</span></div>
+      <div class="tree-node"><span class="tree-icon">📄</span><span class="tree-name">package-lock.json</span></div>
+      <div class="tree-node"><span class="tree-icon">📄</span><span class="tree-name">.gitignore</span></div>
+    </div>
+
+    <!-- Call graph par module -->
+    <div>
+      <div class="call-graph">
+
+        <!-- main.js -->
+        <div class="cg-module" style="border-color:#38bdf840">
+          <div class="cg-module-header">
+            <div class="comp-icon" style="background:var(--electron);width:8px;height:8px;border-radius:2px"></div>
+            <div class="cg-module-file" style="color:var(--electron)">main.js</div>
+            <div class="cg-module-path">Electron Main Process · Node.js</div>
+          </div>
+          <div class="cg-module-body">
+            <div class="cg-fn" style="border-color:#38bdf840">
+              <div class="cg-fn-name" style="color:var(--electron)">app.whenReady()</div>
+              <div class="cg-fn-sig">() → void</div>
+              <div class="cg-fn-calls">→ <span>store.get('dbChoice')</span><br>→ <span>createChoiceWindow()</span> | <span>handleDbChoice()</span></div>
+            </div>
+            <div class="cg-fn" style="border-color:#38bdf840">
+              <div class="cg-fn-name" style="color:var(--electron)">createChoiceWindow()</div>
+              <div class="cg-fn-sig">() → BrowserWindow</div>
+              <div class="cg-fn-calls">→ <span>new BrowserWindow(opts)</span><br>→ <span>win.loadFile('choice.html')</span></div>
+            </div>
+            <div class="cg-fn" style="border-color:#38bdf840">
+              <div class="cg-fn-name" style="color:var(--electron)">handleDbChoice(choice)</div>
+              <div class="cg-fn-sig">(choice: Object) → Promise&lt;void&gt;</div>
+              <div class="cg-fn-calls">→ <span>store.set()</span> (si remember)<br>→ <span>spawn('python', [...])</span> (local)<br>→ <span>waitForServer(url)</span><br>→ <span>createWindow()</span></div>
+            </div>
+            <div class="cg-fn" style="border-color:#38bdf840">
+              <div class="cg-fn-name" style="color:var(--electron)">waitForServer(url, retries)</div>
+              <div class="cg-fn-sig">(url: str, n: int) → Promise&lt;bool&gt;</div>
+              <div class="cg-fn-calls">→ <span>net.request(GET /api/health)</span><br>→ recursive (500ms delay × 30)</div>
+            </div>
+            <div class="cg-fn" style="border-color:#38bdf840">
+              <div class="cg-fn-name" style="color:var(--electron)">createWindow()</div>
+              <div class="cg-fn-sig">() → BrowserWindow</div>
+              <div class="cg-fn-calls">→ <span>new BrowserWindow({preload})</span><br>→ <span>win.webContents.send('db-url', url)</span></div>
+            </div>
+            <div class="cg-fn">
+              <div class="cg-fn-name">IPC: ipcMain.on('db-choice')</div>
+              <div class="cg-fn-sig">handler</div>
+              <div class="cg-fn-calls">→ <span>handleDbChoice(choice)</span></div>
+            </div>
+            <div class="cg-fn">
+              <div class="cg-fn-name">IPC: ipcMain.on('forget-db-choice')</div>
+              <div class="cg-fn-sig">handler</div>
+              <div class="cg-fn-calls">→ <span>store.delete()</span><br>→ <span>app.relaunch()</span></div>
+            </div>
+            <div class="cg-fn">
+              <div class="cg-fn-name">IPC: ipcMain.handle('ping-url')</div>
+              <div class="cg-fn-sig">handler</div>
+              <div class="cg-fn-calls">→ <span>net.request(GET /api/health)</span></div>
+            </div>
+            <div class="cg-fn">
+              <div class="cg-fn-name">IPC: ipcMain.handle('show-confirmation-dialog')</div>
+              <div class="cg-fn-sig">handler</div>
+              <div class="cg-fn-calls">→ <span>dialog.showMessageBox()</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- preload.js -->
+        <div class="cg-module" style="border-color:#a78bfa40">
+          <div class="cg-module-header">
+            <div class="comp-icon" style="background:var(--ipc);width:8px;height:8px;border-radius:2px"></div>
+            <div class="cg-module-file" style="color:var(--ipc)">preload.js</div>
+            <div class="cg-module-path">contextBridge — Renderer ↔ Main</div>
+          </div>
+          <div class="cg-module-body">
+            <div class="cg-fn" style="border-color:#a78bfa40">
+              <div class="cg-fn-name" style="color:var(--ipc)">dbUrlPromise</div>
+              <div class="cg-fn-sig">Promise&lt;string&gt;</div>
+              <div class="cg-fn-calls">→ <span>ipcRenderer.on('db-url', resolve)</span></div>
+            </div>
+            <div class="cg-fn" style="border-color:#a78bfa40">
+              <div class="cg-fn-name" style="color:var(--ipc)">window.api.fetch(path, opts)</div>
+              <div class="cg-fn-sig">(path: str, opts?) → Promise&lt;any&gt;</div>
+              <div class="cg-fn-calls">→ <span>dbUrlPromise.then()</span><br>→ <span>fetch(baseUrl + path, opts)</span><br>→ throw si res.erreur</div>
+            </div>
+            <div class="cg-fn" style="border-color:#a78bfa40">
+              <div class="cg-fn-name" style="color:var(--ipc)">window.api.on(channel, cb)</div>
+              <div class="cg-fn-sig">(ch: str, cb: fn) → void</div>
+              <div class="cg-fn-calls">→ <span>ipcRenderer.on(channel, cb)</span></div>
+            </div>
+            <div class="cg-fn" style="border-color:#a78bfa40">
+              <div class="cg-fn-name" style="color:var(--ipc)">window.api.forgetDbChoice()</div>
+              <div class="cg-fn-sig">() → void</div>
+              <div class="cg-fn-calls">→ <span>ipcRenderer.send('forget-db-choice')</span></div>
+            </div>
+            <div class="cg-fn" style="border-color:#a78bfa40">
+              <div class="cg-fn-name" style="color:var(--ipc)">window.ipc.ping(url)</div>
+              <div class="cg-fn-sig">(url: str) → Promise&lt;bool&gt;</div>
+              <div class="cg-fn-calls">→ <span>ipcRenderer.invoke('ping-url', url)</span></div>
+            </div>
+            <div class="cg-fn" style="border-color:#a78bfa40">
+              <div class="cg-fn-name" style="color:var(--ipc)">window.ipc.showConfirmationDialog(msg)</div>
+              <div class="cg-fn-sig">(msg: str) → Promise&lt;bool&gt;</div>
+              <div class="cg-fn-calls">→ <span>ipcRenderer.invoke('show-confirmation-dialog', msg)</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- index.js (MainRenderer) -->
+        <div class="cg-module" style="border-color:#38bdf830">
+          <div class="cg-module-header">
+            <div class="comp-icon" style="background:#60a5fa;width:8px;height:8px;border-radius:2px"></div>
+            <div class="cg-module-file" style="color:#60a5fa">index.js</div>
+            <div class="cg-module-path">MainRenderer — CRUD UI</div>
+          </div>
+          <div class="cg-module-body">
+            <div class="cg-fn">
+              <div class="cg-fn-name" style="color:#60a5fa">loadContacts()</div>
+              <div class="cg-fn-sig">() → void</div>
+              <div class="cg-fn-calls">→ <span>api.fetch('/api/contacts')</span><br>→ renderContacts(data)</div>
+            </div>
+            <div class="cg-fn">
+              <div class="cg-fn-name" style="color:#60a5fa">addContact()</div>
+              <div class="cg-fn-sig">() → void</div>
+              <div class="cg-fn-calls">→ <span>validateContact()</span><br>→ <span>api.fetch('/api/contacts', POST)</span><br>→ <span>loadContacts()</span></div>
+            </div>
+            <div class="cg-fn">
+              <div class="cg-fn-name" style="color:#60a5fa">editContact(id)</div>
+              <div class="cg-fn-sig">(id: int) → void</div>
+              <div class="cg-fn-calls">→ <span>api.fetch('/api/contacts/:id', PUT)</span><br>→ <span>loadContacts()</span></div>
+            </div>
+            <div class="cg-fn">
+              <div class="cg-fn-name" style="color:#60a5fa">deleteContact(id)</div>
+              <div class="cg-fn-sig">(id: int) → void</div>
+              <div class="cg-fn-calls">→ <span>ipc.showConfirmationDialog()</span><br>→ <span>api.fetch('/api/contacts/:id', DELETE)</span></div>
+            </div>
+            <div class="cg-fn">
+              <div class="cg-fn-name" style="color:#60a5fa">searchContacts(q)</div>
+              <div class="cg-fn-sig">(q: str) → void</div>
+              <div class="cg-fn-calls">→ <span>api.fetch('/api/contacts/search?q=')</span></div>
+            </div>
+            <div class="cg-fn">
+              <div class="cg-fn-name" style="color:#60a5fa">validateContact(data)</div>
+              <div class="cg-fn-sig">(data: Obj) → bool</div>
+              <div class="cg-fn-calls">regex email · /\D/ tel · len === 10</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- api_server.py -->
+        <div class="cg-module" style="border-color:#f8717140">
+          <div class="cg-module-header">
+            <div class="comp-icon" style="background:var(--flask);width:8px;height:8px;border-radius:2px"></div>
+            <div class="cg-module-file" style="color:var(--flask)">api_server.py</div>
+            <div class="cg-module-path">Flask REST API · SQLAlchemy ORM</div>
+          </div>
+          <div class="cg-module-body">
+            <div class="cg-fn" style="border-color:#f8717140">
+              <div class="cg-fn-name" style="color:var(--flask)">AnnuaireManager.ajouter_contact()</div>
+              <div class="cg-fn-sig">(nom, prenom, email, tel, adr, adr_w) → Dict</div>
+              <div class="cg-fn-calls">→ <span>Contact(**kwargs)</span><br>→ <span>db.session.add() + commit()</span></div>
+            </div>
+            <div class="cg-fn" style="border-color:#f8717140">
+              <div class="cg-fn-name" style="color:var(--flask)">AnnuaireManager.rechercher_contacts()</div>
+              <div class="cg-fn-sig">(terme: str) → List[Dict]</div>
+              <div class="cg-fn-calls">→ <span>Contact.query.filter(ilike)</span></div>
+            </div>
+            <div class="cg-fn" style="border-color:#f8717140">
+              <div class="cg-fn-name" style="color:var(--flask)">validate_email()</div>
+              <div class="cg-fn-sig">(email: str) → (bool, str)</div>
+              <div class="cg-fn-calls">→ <span>re.match(pattern, email)</span></div>
+            </div>
+            <div class="cg-fn" style="border-color:#f8717140">
+              <div class="cg-fn-name" style="color:var(--flask)">validate_telephone()</div>
+              <div class="cg-fn-sig">(tel: str) → (bool, str)</div>
+              <div class="cg-fn-calls">→ <span>re.sub(\D, '', tel)</span> · len == 10</div>
+            </div>
+            <div class="cg-fn" style="border-color:#f8717140">
+              <div class="cg-fn-name" style="color:var(--flask)">health_check()</div>
+              <div class="cg-fn-sig">GET /api/health → JSON</div>
+              <div class="cg-fn-calls">→ <span>db.session.execute('SELECT 1')</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Graphe d'appels inter-modules -->
+      <div class="cg-arrows" style="margin-top:18px">
+        <div style="padding:9px 14px;border-bottom:1px solid var(--border2);font-size:0.65rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;letter-spacing:2px">GRAPHE D'APPELS INTER-MODULES</div>
+        <div class="cg-arrow-row"><span class="cg-caller">main.js</span><span class="cg-symbol">→</span><span class="cg-callee">api_server.py</span><span class="cg-desc">spawn ChildProcess | net.request /api/health</span></div>
+        <div class="cg-arrow-row"><span class="cg-caller">main.js</span><span class="cg-symbol">→</span><span class="cg-callee">preload.js</span><span class="cg-desc">webPreferences.preload + webContents.send('db-url')</span></div>
+        <div class="cg-arrow-row"><span class="cg-caller">choice.js</span><span class="cg-symbol">→</span><span class="cg-callee">main.js</span><span class="cg-desc">window.ipc.send('db-choice', ...) | window.ipc.ping(url)</span></div>
+        <div class="cg-arrow-row"><span class="cg-caller">index.js</span><span class="cg-symbol">→</span><span class="cg-callee">preload.js</span><span class="cg-desc">window.api.fetch(...) | window.ipc.showConfirmationDialog(...)</span></div>
+        <div class="cg-arrow-row"><span class="cg-caller">preload.js</span><span class="cg-symbol">→</span><span class="cg-callee">api_server.py</span><span class="cg-desc">HTTP fetch(baseUrl + path) → REST endpoints</span></div>
+        <div class="cg-arrow-row"><span class="cg-caller">api_server.py routes</span><span class="cg-symbol">→</span><span class="cg-callee">AnnuaireManager</span><span class="cg-desc">annuaire.ajouter_contact() | modifier_contact() | ...</span></div>
+        <div class="cg-arrow-row"><span class="cg-caller">AnnuaireManager</span><span class="cg-symbol">→</span><span class="cg-callee">Contact (ORM)</span><span class="cg-desc">db.session.add / query / delete | contact.to_dict()</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     ⑦ CAS D'USAGE
+══════════════════════════════════════════════ -->
+<section id="usage">
+  <div class="section-heading">Diagramme de Cas d'Usage · UML Use Case</div>
+
+  <div class="uc-layout">
+
+    <!-- Acteurs -->
+    <div class="uc-actors">
+      <div class="uc-actor" style="border-color:#38bdf840">
+        <div class="uc-actor-icon">👤</div>
+        <div class="uc-actor-name" style="color:var(--electron)">Utilisateur</div>
+        <div class="uc-actor-role">«primary actor»<br>Samuel / Théo / Utilisateur final</div>
+      </div>
+      <div class="uc-actor" style="border-color:#f8717140">
+        <div class="uc-actor-icon">⚙️</div>
+        <div class="uc-actor-name" style="color:var(--flask)">Système Flask</div>
+        <div class="uc-actor-role">«actor» Backend API<br>Local ou distant</div>
+      </div>
+      <div class="uc-actor" style="border-color:#4ade8040">
+        <div class="uc-actor-icon">🗄️</div>
+        <div class="uc-actor-name" style="color:var(--db)">Base de données</div>
+        <div class="uc-actor-role">«actor» SQLite / PostgreSQL<br>Locale ou distante</div>
+      </div>
+      <div class="uc-actor" style="border-color:#a78bfa40">
+        <div class="uc-actor-icon">🖥️</div>
+        <div class="uc-actor-name" style="color:var(--ipc)">Système OS</div>
+        <div class="uc-actor-role">«actor» electron-store<br>Préférences persistées</div>
+      </div>
+    </div>
+
+    <!-- Cas d'usage groupés -->
+    <div>
+      <div class="uc-system">
+        <div class="uc-system-title">« SYSTÈME : Annuaire Téléphonique »</div>
+        <div class="uc-groups">
+
+          <div class="uc-group">
+            <div class="uc-group-header">
+              <span style="color:var(--store)">🔌</span> Connexion &amp; Configuration
+            </div>
+            <div class="uc-cases">
+              <div class="uc-case primary">UC-01 · Choisir DB locale</div>
+              <div class="uc-case primary">UC-02 · Choisir serveur Théo</div>
+              <div class="uc-case primary">UC-03 · Saisir URL distante</div>
+              <div class="uc-case secondary">UC-04 · Mémoriser le choix</div>
+              <div class="uc-case secondary">UC-05 · Oublier le choix (Forget)</div>
+              <div class="uc-case system">UC-06 · Ping santé serveur</div>
+              <div class="uc-case system">UC-07 · Attendre disponibilité API</div>
+            </div>
+          </div>
+
+          <div class="uc-group">
+            <div class="uc-group-header">
+              <span style="color:var(--electron)">📋</span> Gestion des Contacts (CRUD)
+            </div>
+            <div class="uc-cases">
+              <div class="uc-case primary">UC-08 · Consulter tous les contacts</div>
+              <div class="uc-case primary">UC-09 · Ajouter un contact</div>
+              <div class="uc-case primary">UC-10 · Modifier un contact</div>
+              <div class="uc-case primary">UC-11 · Supprimer un contact</div>
+              <div class="uc-case primary">UC-12 · Rechercher un contact</div>
+              <div class="uc-case secondary">UC-13 · Voir les détails d'un contact</div>
+            </div>
+          </div>
+
+          <div class="uc-group">
+            <div class="uc-group-header">
+              <span style="color:var(--ipc)">✔️</span> Validation &amp; Intégrité
+            </div>
+            <div class="uc-cases">
+              <div class="uc-case system">UC-14 · Valider format email (client)</div>
+              <div class="uc-case system">UC-15 · Valider téléphone 10 chiffres (client)</div>
+              <div class="uc-case system">UC-16 · Valider email côté serveur</div>
+              <div class="uc-case system">UC-17 · Valider téléphone côté serveur</div>
+              <div class="uc-case system">UC-18 · Confirmer suppression (dialog)</div>
+              <div class="uc-case system">UC-19 · Vérifier unicité email (DB)</div>
+            </div>
+          </div>
+
+          <div class="uc-group">
+            <div class="uc-group-header">
+              <span style="color:var(--db)">📊</span> Statistiques &amp; Monitoring
+            </div>
+            <div class="uc-cases">
+              <div class="uc-case primary">UC-20 · Consulter les statistiques</div>
+              <div class="uc-case system">UC-21 · Vérifier l'état de la base</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Table des relations acteur ↔ cas -->
+      <div class="uc-relations" style="margin-top:20px">
+        <div class="section-heading">Relations Acteur ↔ Cas d'Usage</div>
+        <table>
+          <thead><tr><th>Acteur</th><th>Relation</th><th>Cas d'usage</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td>Utilisateur</td><td>«association»</td><td>UC-01 à UC-05, UC-08 à UC-13, UC-20</td><td>Initie</td></tr>
+            <tr><td>Utilisateur</td><td>«extend»</td><td>UC-04 ← UC-01..03</td><td>Optionnel (remember)</td></tr>
+            <tr><td>Utilisateur</td><td>«extend»</td><td>UC-18 ← UC-11</td><td>Confirmation avant suppression</td></tr>
+            <tr><td>Système Flask</td><td>«include»</td><td>UC-16, UC-17, UC-19 ← UC-09..10</td><td>Toujours exécuté</td></tr>
+            <tr><td>Système Flask</td><td>«association»</td><td>UC-06, UC-21</td><td>Health check</td></tr>
+            <tr><td>Base de données</td><td>«association»</td><td>UC-08..13, UC-19..21</td><td>Persistance</td></tr>
+            <tr><td>Système OS</td><td>«association»</td><td>UC-04, UC-05, UC-07</td><td>electron-store / spawn</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     ⑧ DIAGRAMME DE GANTT
+══════════════════════════════════════════════ -->
+<section id="gantt">
+  <div class="section-heading">Diagramme de Gantt · Planning GitHub Issues</div>
+
+  <div class="gantt-wrap">
+    <div class="gantt" id="ganttChart"></div>
+  </div>
+
+  <div class="gantt-legend">
+    <div class="gantt-legend-item"><div class="gantt-legend-dot done" style="background:#1a3a1a;border:1px solid #4ade8060"></div>Terminé</div>
+    <div class="gantt-legend-item"><div class="gantt-legend-dot progress" style="background:#1a2a3a;border:1px solid #38bdf860"></div>En cours</div>
+    <div class="gantt-legend-item"><div class="gantt-legend-dot pending" style="background:#2a2a1a;border:1px solid #fbbf2440"></div>En attente</div>
+    <div class="gantt-legend-item"><div class="gantt-legend-dot overdue" style="background:#3a1a1a;border:1px solid #f8717160"></div>En retard</div>
+  </div>
+
+  <div style="margin-top:24px">
+    <div class="section-heading">Tâches du projet</div>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Issue GitHub</th><th>Assigné</th><th>Durée estimée</th><th>Statut</th><th>Dépendances</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>#2</td><td>Code python (api.py)</td><td>Théo</td><td>~trop de temps</td><td style="color:var(--db)">✓ Terminé</td><td>—</td></tr>
+        <tr><td>#5</td><td>Main Graphical Interface</td><td>Samuel</td><td>3 heures</td><td style="color:var(--db)">✓ Terminé</td><td>#2</td></tr>
+        <tr><td>#6</td><td>Prototypage</td><td>Samuel &amp; Théo</td><td>2 heures</td><td style="color:var(--db)">✓ Terminé</td><td>—</td></tr>
+        <tr><td>#7</td><td>Added node.js things</td><td>Samuel</td><td>2 heures</td><td style="color:var(--db)">✓ Terminé</td><td>#6</td></tr>
+        <tr><td>#8</td><td>Add style, animations</td><td>Samuel</td><td>~longue durée</td><td style="color:var(--electron)">⟳ En cours</td><td>#5, #7</td></tr>
+        <tr><td>#10</td><td>Create API server (isolated)</td><td>Théo</td><td>~</td><td style="color:var(--electron)">⟳ En cours</td><td>#2</td></tr>
+        <tr><td>#11</td><td>Create .exe app</td><td>Samuel &amp; Théo</td><td>30 min</td><td style="color:var(--db)">✓ Terminé</td><td>#2, #7</td></tr>
+        <tr><td>#12</td><td>Add DB server as system tray app</td><td>Théo</td><td>—</td><td style="color:var(--store)">⏳ Planifié</td><td>#10</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+function showTab(id, el) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── Gantt Chart Builder ──────────────────────────────
+(function buildGantt() {
+  const tasks = [
+    { num: '#6',  name: 'Prototypage',               assignee: 'S+T', start: 0,  end: 2,   status: 'done' },
+    { num: '#2',  name: 'Code python (api.py)',        assignee: 'Théo', start: 1,  end: 6,   status: 'done' },
+    { num: '#7',  name: 'Node.js integration',        assignee: 'Sam',  start: 3,  end: 5,   status: 'done' },
+    { num: '#5',  name: 'Main Graphical Interface',   assignee: 'Sam',  start: 3,  end: 6,   status: 'done' },
+    { num: '#11', name: 'Create .exe app',            assignee: 'S+T',  start: 5,  end: 5.5, status: 'done' },
+    { num: '#8',  name: 'Style & animations',         assignee: 'Sam',  start: 5,  end: 13,  status: 'progress' },
+    { num: '#10', name: 'API server (isolated)',      assignee: 'Théo', start: 7,  end: 11,  status: 'progress' },
+    { num: '#12', name: 'DB server system tray',     assignee: 'Théo', start: 13, end: 15,  status: 'pending' },
+  ];
+
+  // Total span = 16 units, today at unit 13 (based on image: red line near end)
+  const TOTAL = 16;
+  const TODAY = 13; // approximate position of today marker
+
+  // Week labels
+  const weekLabels = [];
+  for (let w = 0; w <= TOTAL; w++) weekLabels.push('S' + (w + 15));
+
+  const gantt = document.getElementById('ganttChart');
+
+  // Header
+  let headerHtml = `<div class="gantt-header" style="display:grid;grid-template-columns:240px 1fr">
+    <div class="gantt-header-left">Tâche</div>
+    <div class="gantt-header-dates" style="position:relative">`;
+  for (let i = 0; i < TOTAL; i++) {
+    headerHtml += `<div class="gantt-month-label">Sem ${15 + i}</div>`;
+  }
+  headerHtml += `</div></div>`;
+
+  // Rows
+  let rowsHtml = '';
+  tasks.forEach(t => {
+    const leftPct = (t.start / TOTAL) * 100;
+    const widthPct = ((t.end - t.start) / TOTAL) * 100;
+    rowsHtml += `
+    <div class="gantt-row">
+      <div class="gantt-task-info" style="width:240px">
+        <span class="gantt-task-num">${t.num}</span>
+        <span class="gantt-task-name">${t.name}</span>
+      </div>
+      <div class="gantt-timeline" style="position:relative;flex:1;height:36px">
+        <div class="gantt-today" style="left:${(TODAY/TOTAL)*100}%"></div>
+        <div class="gantt-bar ${t.status}" style="left:${leftPct}%;width:${widthPct}%">
+          ${t.assignee}
+        </div>
+      </div>
+    </div>`;
+  });
+
+  gantt.innerHTML = headerHtml + rowsHtml;
+})();
+</script>
+</body>
+</html>
